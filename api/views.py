@@ -1,6 +1,14 @@
-from django.shortcuts import render
-
-# Create your views here.
+#coding:utf-8
+"""
+@file:      ProductPageSpider
+@author:    lyn
+@contact:   tonylu716@gmail.com
+@python:    3.3
+@editor:    PyCharm
+@create:    2016-11-02 22:30
+@description:
+        本模块放django路由映射的视图函数
+"""
 
 from .SearchPageInfoGenerator import StoreInfoGenerator
 from .ProductPageSpider import ProductPageSpider

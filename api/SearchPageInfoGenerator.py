@@ -77,6 +77,7 @@ class StoreInfoGenerator:
         return 1
 
     def to_json(self):
+        #字典封装
         res = self.run()
         if res==1:
             print('Result OK')
