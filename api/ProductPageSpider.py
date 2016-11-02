@@ -12,13 +12,14 @@
 from bs4 import BeautifulSoup as BS
 from .ProductPageParser import ProductPageParser,Product
 import requests
+from multiprocessing.dummy import Pool as ThreadPool
 
 class ProductPageSpider:
     def __init__(self,url):
         self.url = url
         self.domain = url.split('?')[0].split('/')[-2]
         self.products_data = {}
-        soup = BS(requests.get(self.url).text,'html.parser')
+        soup = BS(requests.get(self.url).text,'lxml')
         self.jsonp_url = 'https://'+ self.domain + soup.select_one('#J_ShopAsynSearchURL')['value']
         print('jsonp url:',self.jsonp_url)
 
@@ -27,6 +28,7 @@ class ProductPageSpider:
         url = self.jsonp_url
         if page_index!=1:
             url += '&pageNo={}'.format(page_index)
+        print('crawl page {}... {}'.format(page_index,url))
         page_prods= []
         parser = ProductPageParser(
             from_web=True,
@@ -44,6 +46,7 @@ class ProductPageSpider:
                         break
                 page_prods.append(prod_info_dict)
             self.products_data[page_index] = page_prods
+            print('append page {} data ok!'.format(page_index))
         if page_index==1:
             return parser.page_num
 
@@ -55,8 +58,15 @@ class ProductPageSpider:
 
     def run(self):
         self.page_num = self.crawl_jsonp_page(1)
-        for page_index in range(2,self.page_num+1):
-            self.crawl_jsonp_page(page_index)
+        print('page num: {}'.format(self.page_num))
+        if self.page_num < 16:
+            thread_cot = self.page_num
+        else:
+            thread_cot = 16
+        pool = ThreadPool(thread_cot)
+        pool.map(self.crawl_jsonp_page,range(2,self.page_num+1))
+        pool.close()
+        pool.join()
 
     def get_products_info(self):
         #字典封装

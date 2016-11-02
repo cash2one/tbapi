@@ -22,7 +22,7 @@ class ProductPageParser:
         if not from_web:
             with open('./sample.html','rb') as f:
                 html_source = f.read()
-        self.soup = BeautifulSoup(html_source,'html.parser')
+        self.soup = BeautifulSoup(html_source,'lxml')
 
     @property
     @ERN_METHOD
