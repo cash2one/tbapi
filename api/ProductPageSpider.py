@@ -19,7 +19,11 @@ class ProductPageSpider:
         self.url = url
         self.domain = url.split('?')[0].split('/')[-2]
         self.products_data = {}
-        soup = BS(requests.get(self.url).text,'lxml')
+        html = requests.get(self.url).text
+        try:
+            soup = BS(html,'lxml')
+        except:
+            soup = BS(html,'html.parser')
         self.jsonp_url = 'https://'+ self.domain + soup.select_one('#J_ShopAsynSearchURL')['value']
         print('jsonp url:',self.jsonp_url)
 
