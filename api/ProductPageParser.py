@@ -18,7 +18,7 @@ class ProductPageParser:
         本类并非解析原页面 https://qyxcy.tmall.com/search.htm?spm=a1z10.3-b-s.w4011-15377984973.225.8r6Wz3&search=y&orderType=newOn_desc&pageNo=2&tsearch=y#anchor
         解析模版渲染前得到的jsonp中的html字符串
     '''
-    def __init__(self,html_source=None,from_web=False):
+    def __init__(self,html_source=None,from_web=True):
         if not from_web:
             with open('./sample.html','rb') as f:
                 html_source = f.read()
