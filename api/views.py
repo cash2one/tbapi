@@ -60,7 +60,7 @@ def handle_product_page_request(request,just_for_page_num=False):
         else:
             ret['data'] = spider.get_products_info()
         ret['status'] = 1
-        print('sent products page info ok!')
+        print('Sent info json ok!')
     except KeyError as e:
         ret['message'] = str(e)
     except Exception as e:
