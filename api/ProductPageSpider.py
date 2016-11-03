@@ -78,7 +78,7 @@ class ProductPageSpider:
         #字典封装
         self.run()
         return {
-            'page_num': self.page_num,
+            'page_nums': list(range(1,self.page_num+1)),
             'products': self.products_data
         }
 
