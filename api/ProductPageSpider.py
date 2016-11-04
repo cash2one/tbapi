@@ -16,6 +16,8 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 class ProductPageSpider:
     def __init__(self,url):
+        if 'tmall' not in url:
+            raise KeyError('just support for tmall.com')
         self.url = url
         self.domain = url.split('?')[0].split('/')[-2]
         self.products_data = {}
@@ -76,7 +78,7 @@ class ProductPageSpider:
         #字典封装
         self.run()
         return {
-            'page_num': self.page_num,
+            'page_nums': list(range(1,self.page_num+1)),
             'products': self.products_data
         }
 

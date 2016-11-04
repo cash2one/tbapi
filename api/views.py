@@ -38,23 +38,15 @@ def get_store_info(request):
 
 @json_response
 def get_page_num(request):
-    ret = {'data': None, 'status': 0, 'message': None}
-    if request.method != 'GET':
-        ret['message'] = 'use GET method'
-        return ret
-    products_url = request.GET.get('products_url')
-    print('receive products_url: ',products_url)
-    try:
-        ret['data'] = ProductPageSpider(products_url).get_page_num()
-        ret['status'] = 1
-        print('sent {} ok!'.format(ret['data']))
-    except Exception as e:
-        ret['message'] = 'check products url'
-        print(e)
-    return ret
+    return handle_product_page_request(
+            request,just_for_page_num=True)
 
 @json_response
 def get_products_info(request):
+    return handle_product_page_request(
+            request,just_for_page_num=False)
+
+def handle_product_page_request(request,just_for_page_num=False):
     ret = {'data': None, 'status': 0, 'message': None}
     if request.method != 'GET':
         ret['message'] = 'use GET method'
@@ -62,9 +54,15 @@ def get_products_info(request):
     products_url = request.GET.get('products_url')
     print('receive products_url: ',products_url)
     try:
-        ret['data'] = ProductPageSpider(products_url).get_products_info()
+        spider = ProductPageSpider(products_url)
+        if just_for_page_num:
+            ret['data'] = spider.get_page_num()
+        else:
+            ret['data'] = spider.get_products_info()
         ret['status'] = 1
-        print('sent products info ok!')
+        print('Sent info json ok!')
+    except KeyError as e:
+        ret['message'] = str(e)
     except Exception as e:
         ret['message'] = 'check products url'
         print(e)
