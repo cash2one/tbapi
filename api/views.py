@@ -12,6 +12,7 @@
 
 from .SearchPageInfoGenerator import StoreInfoGenerator
 from .ProductPageSpider import ProductPageSpider
+from .DarenPageSpider import DarenPageSpider
 from .func import json_response
 
 @json_response
@@ -59,6 +60,26 @@ def handle_product_page_request(request,just_for_page_num=False):
             ret['data'] = spider.get_page_num()
         else:
             ret['data'] = spider.get_products_info()
+        ret['status'] = 1
+        print('Sent info json ok!')
+    except KeyError as e:
+        ret['message'] = str(e)
+    except Exception as e:
+        ret['message'] = 'check products url'
+        print(e)
+    return ret
+
+@json_response
+def get_daren_prods(request):
+    ret = {'data': None, 'status': 0, 'message': None}
+    if request.method != 'GET':
+        ret['message'] = 'use GET method'
+        return ret
+    daren_url = request.GET.get('daren_url')
+    print('receive daren home page url: ', daren_url)
+    try:
+        spider = DarenPageSpider(daren_url)
+        ret['data'] = spider.to_json()
         ret['status'] = 1
         print('Sent info json ok!')
     except KeyError as e:

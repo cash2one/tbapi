@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^get_store_info',get_store_info),
     url(r'^get_page_num',get_page_num),
     url(r'^get_products_info',get_products_info),
+    url(r'^get_daren_prods',get_daren_prods),
 ]
 
 '''
@@ -30,4 +31,5 @@ urlpatterns = [
         http://127.0.0.1:8000/get_store_info?store_url=https://detail.tmall.com/item.htm?id=538059530916&spm=a219t.7900221/10.1998910419.d30ccd691.YF4fJI
         http://127.0.0.1:8000/get_page_num?products_url=https://qyxcy.tmall.com/search.htm?search=y&orderType=newOn_desc&tsearch=y
         http://127.0.0.1:8000/get_products_info?products_url=https://qyxcy.tmall.com/search.htm?search=y&orderType=newOn_desc&tsearch=y
+        http://127.0.0.1:8000/get_daren_prods?daren_url=http://ku.uz.taobao.com/
 '''
