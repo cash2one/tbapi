@@ -41,7 +41,7 @@ class DarenPageSpider:
 
     def pre_handle(self):
         txt = request_with_ipad(self.url).text
-        soup = BeautifulSoup(txt, 'lxml')
+        soup = BeautifulSoup(txt, 'html.parser')
         js_str = soup.find('script', text=re.compile('domain')).text
         words = re.split("domain: |,", js_str)
         #print(words)
