@@ -26,22 +26,31 @@ class DarenPageParser:
     @property
     @ERN_METHOD
     def sections(self):
-        return self.soup.select('.J_SiteSItem')
+        try:
+            return self.soup.select('.J_SiteSItem')
+        except:
+            return self.soup.select('.water-item')
 
     @property
     @ERN_METHOD
     def page_num(self):
-        return int(self.soup.select_one('.count').text.strip('共').strip('页'))
+        try:
+            return int(self.soup.select_one('.count').text.strip('共').strip('页'))
+        except:
+            return int(self.soup.select_one('.paginator').find_all('a')[-2].text)
 
     @property
-    @ERN_METHOD
     def category_urls_id_names(self):
         #在解析首页时，返回该商铺的子标签信息元组(url,id)
         #注意为了使请求数最少，每页的请求size调至最大的500
-        return [
-            ( 'http:'+a['href']+'&page_size=500', a['href'].split('=')[-1], a.text )
-                for a in self.soup.select_one('.dz_dhh').find_all('a')
-        ][1:-1]
+        try:
+            return [
+                ( 'http:'+a['href']+'&page_size=500', a['href'].split('=')[-1], a.text )
+                    for a in self.soup.select_one('.dz_dhh').find_all('a')
+            ][1:-1]
+        except:
+            print('No sub category in this daren home page')
+            return []
 
 
 class Product:

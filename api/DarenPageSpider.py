@@ -11,8 +11,8 @@
 """
 from multiprocessing.dummy import Pool as ThreadPool
 from .DarenPageParser import DarenPageParser,Product
-import requests
-
+from bs4 import BeautifulSoup
+import requests,re
 
 def request_with_ipad(url):
     return requests.get(url,
@@ -22,16 +22,42 @@ def request_with_ipad(url):
 
 class DarenPageSpider:
     '''
-        sample domain: http://ku.uz.taobao.com
+        sample domain: http://uz.taobao.com/home/86428989/
     '''
-    def __init__(self,domain):
-        self.domain = domain
+    def __init__(self,url):
+        self.url = url
         self.json_data = []
+        self.user_domain = None
+        self.user_id = None
+        if 'home' in url:
+            self.user_id = self.url.split('/')[-2]
+            self.pre_handle()
+            #print(self.user_domain)
+            self.domain = 'http://{}.uz.taobao.com/'.format(self.user_domain)
+            #print(self.domain)
+        else:
+            self.domain = url
+        self.ct_url_ids = self.get_category_urls_id_names()
+
+    def pre_handle(self):
+        txt = request_with_ipad(self.url).text
+        soup = BeautifulSoup(txt, 'lxml')
+        js_str = soup.find('script', text=re.compile('domain')).text
+        words = re.split("domain: |,", js_str)
+        #print(words)
+        for word in words:
+            #print(word)
+            if "domain:" in word:
+                self.user_domain = word.split(":")[-1].strip("'")
+                break
+        if self.user_domain==None:
+            raise Exception('Pre handle for user domain failed')
 
     def get_category_urls_id_names(self):
         return DarenPageParser(
                 html_source=request_with_ipad(self.domain).text
             ).category_urls_id_names
+
 
     def crawl_per_category(self,category_url_id_name):
         category_url = category_url_id_name[0]
@@ -82,27 +108,37 @@ class DarenPageSpider:
               .format(len(sections),page_url))
         prods = []
         for sec in sections:
-            #Product(div_section=sec, domain=category_url).show_in_cmd()
-            prods.append(
-                Product(div_section=sec, domain=category_url).to_dict()
-            )
+            prod = Product(div_section=sec, domain=category_url).to_dict()
+            prods.append(prod)
         category_data['page_data'][page_index] = prods
 
     def run(self):
-        ct_url_ids = self.get_category_urls_id_names()
-        if len(ct_url_ids)<16:
-            extern_thread_cot = len(ct_url_ids)
+        if self.ct_url_ids==[]:
+            #没有二级菜单时只能爬主页
+            self.crawl_per_category(
+                category_url_id_name = (
+                    '{}index.htm?pageSize=500'.format(self.domain),
+                    None,
+                    '首页'
+                )
+            )
         else:
-            extern_thread_cot = 16
-        pool = ThreadPool(extern_thread_cot)
-        pool.map(self.crawl_per_category,ct_url_ids)
-        pool.close()
-        pool.join()
+            if len(self.ct_url_ids)<16:
+                extern_thread_cot = len(self.ct_url_ids)
+            else:
+                extern_thread_cot = 16
+            pool = ThreadPool(extern_thread_cot)
+            pool.map(self.crawl_per_category,self.ct_url_ids)
+            pool.close()
+            pool.join()
 
     def to_json(self):
         self.run()
         print('全部爬取完成')
-        return self.json_data
+        return {
+            'daren_prods': self.json_data,
+            'user_id': self.user_id
+        }
 
 if __name__=='__main__':
     data = DarenPageSpider(domain='http://ku.uz.taobao.com').to_json()
