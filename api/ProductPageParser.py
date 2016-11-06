@@ -70,7 +70,7 @@ class Product:
     @ERN_METHOD
     def link(self):
         #商品链接
-        return self.sec.select_one('.item-name')['href']
+        return 'http:'+self.sec.select_one('.item-name')['href']
 
     @property
     def cmt_cot(self):
@@ -82,9 +82,13 @@ class Product:
     @property
     def cmt_link(self):
         try:
-            return self.sec.select_one('.title').find('a')['href']
+            return 'http:'+self.sec.select_one('.title').find('a')['href']
         except:
             pass
+
+    @property
+    def img_src(self):
+        return 'http:'+self.sec.find('img')['data-ks-lazyload']
 
     def to_dict(self):
         return {
@@ -94,6 +98,7 @@ class Product:
             'link':self.link,
             'cmt_cot':self.cmt_cot,
             'cmt_link':self.cmt_link,
+            'img_src':self.img_src
         }
 
     def show_in_cmd(self):
@@ -104,6 +109,7 @@ class Product:
         print('sales:\t{}'.format(self.sales))
         print('title:\t{}'.format(self.title))
         print('price:\t{}'.format(self.price))
+        print('img_src:\t{}'.format(self.img_src))
         print('cmt_cot:\t{}'.format(self.cmt_cot))
         print('cmt_link:\t{}'.format(self.cmt_link))
 
