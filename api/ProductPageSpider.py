@@ -50,9 +50,6 @@ class ProductPageSpider:
             #只拿page_num时不要条目数据
             for sec in parser.sections:
                 prod_info_dict = Product(sec).to_dict()
-                if None==prod_info_dict['cmt_link']:
-                    #这里判断已经到搜索至下方推荐条目，不再追加
-                    break
                 page_prods.append(prod_info_dict)
             self.products_data[page_index] = page_prods
             print('append page {} data ok!'.format(page_index))
