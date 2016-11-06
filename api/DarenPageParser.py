@@ -9,15 +9,17 @@
 @description:
         用于解析达人页的商品列表
 """
+import json
 from bs4 import BeautifulSoup
 from .decorators import except_return_none
-ERN_METHOD = lambda func:except_return_none(func,ModelName='Product')
+ERN_METHOD = lambda func:except_return_none(func,ModelName='DarenPageParser')
 
 class DarenPageParser:
     def __init__(self,html_source=None,from_web=True):
         if not from_web:
             with open('./daren.html','rb') as f:
                 html_source = f.read()
+        self.html_source = html_source
         try:
             self.soup = BeautifulSoup(html_source,'lxml')
         except:
@@ -27,10 +29,7 @@ class DarenPageParser:
     @ERN_METHOD
     def sections(self):
         #包含所有商品列表的 div
-        try:
-            return self.soup.select('.J_SiteSItem')
-        except:
-            return self.soup.select('.water-item')
+        return self.soup.select('.J_SiteSItem')
 
     @property
     @ERN_METHOD
@@ -39,7 +38,10 @@ class DarenPageParser:
         try:
             return int(self.soup.select_one('.count').text.strip('共').strip('页'))
         except:
-            return int(self.soup.select_one('.paginator').find_all('a')[-2].text)
+            try:
+                return int(self.soup.select_one('.paginator').find_all('a')[-2].text)
+            except:
+                return 1
 
     @property
     def category_urls_id_names(self):
@@ -53,6 +55,48 @@ class DarenPageParser:
         except:
             print('No sub category in this daren home page')
             return []
+
+    def get_prods_list(self):
+        #第二阶段对json数据的直接索取（不通过product解析类）
+        return ProdsInfoGenerator(
+            html_source=self.html_source
+        ).to_list()
+
+
+class ProdsInfoGenerator:
+    def __init__(self,html_source):
+        self.json_str = html_source.split('daogouContents :   ')[1]\
+                            .split('-->\r\n<')[0]
+        self.pre_handle()
+
+    @ERN_METHOD
+    def pre_handle(self):
+        self.jds = []
+        for prod in self.json_str.split('}, {'):
+            # print(prod)
+            jd = {}
+            for kv in prod.split(', '):
+                # print(kv)
+                k = kv.split('=')[0].strip()
+                try:
+                    v = kv.split('=')[1].strip()
+                except:
+                    continue
+                if '\r' in v:
+                    continue
+                if v == 'null':
+                    v = None
+                try:
+                    v = int(v)
+                except:
+                    pass
+                jd[k] = v
+            #print(jd)
+            self.jds.append(jd)
+
+    def to_list(self):
+        return self.jds
+
 
 
 class Product:
