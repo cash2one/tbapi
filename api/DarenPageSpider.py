@@ -29,6 +29,7 @@ class DarenPageSpider:
         self.json_data = []
         self.user_domain = None
         self.user_id = None
+        #支持两种格式的url,包含home或不包含
         if 'home' in url:
             self.user_id = self.url.split('/')[-2]
             self.pre_handle()
@@ -40,6 +41,7 @@ class DarenPageSpider:
         self.ct_url_ids = self.get_category_urls_id_names()
 
     def pre_handle(self):
+        #对url进行预处理，适应两种情况
         txt = request_with_ipad(self.url).text
         soup = BeautifulSoup(txt, 'html.parser')
         js_str = soup.find('script', text=re.compile('domain')).text
@@ -54,12 +56,14 @@ class DarenPageSpider:
             raise Exception('Pre handle for user domain failed')
 
     def get_category_urls_id_names(self):
+        #获取二级菜单
         return DarenPageParser(
                 html_source=request_with_ipad(self.domain).text
             ).category_urls_id_names
 
 
     def crawl_per_category(self,category_url_id_name):
+        #爬取每个二级菜单下的商品信息
         category_url = category_url_id_name[0]
         category_id = category_url_id_name[1]
         category_name = category_url_id_name[2]
@@ -96,6 +100,7 @@ class DarenPageSpider:
         self.json_data.append(category_data)
 
     def crawl_per_page(self,cate_url_page_index_data_dict):
+        #爬取每页商品信息
         category_url = cate_url_page_index_data_dict[0]
         page_index = cate_url_page_index_data_dict[1]
         category_data = cate_url_page_index_data_dict[2]
@@ -108,8 +113,9 @@ class DarenPageSpider:
               .format(len(sections),page_url))
         prods = []
         for sec in sections:
-            prod = Product(div_section=sec, domain=category_url).to_dict()
-            prods.append(prod)
+            prod = Product(div_section=sec, domain=category_url)
+            #prod.show_in_cmd()
+            prods.append(prod.to_dict())
         category_data['page_data'][page_index] = prods
 
     def run(self):
@@ -119,7 +125,7 @@ class DarenPageSpider:
                 category_url_id_name = (
                     '{}index.htm?pageSize=500'.format(self.domain),
                     None,
-                    '首页'
+                    '主页'
                 )
             )
         else:

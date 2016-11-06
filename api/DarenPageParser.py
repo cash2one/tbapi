@@ -26,6 +26,7 @@ class DarenPageParser:
     @property
     @ERN_METHOD
     def sections(self):
+        #包含所有商品列表的 div
         try:
             return self.soup.select('.J_SiteSItem')
         except:
@@ -34,6 +35,7 @@ class DarenPageParser:
     @property
     @ERN_METHOD
     def page_num(self):
+        #本页所表征的页数
         try:
             return int(self.soup.select_one('.count').text.strip('共').strip('页'))
         except:
@@ -99,6 +101,7 @@ class Product:
         print('focus_cot:\t{}'.format(self.focus_cot))
 
     def to_dict(self):
+        # 转为字典
         return {
             'descr': self.descr,
             'id': self.id,
