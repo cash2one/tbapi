@@ -16,10 +16,9 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 class ProductPageSpider:
     def __init__(self,url):
-        if 'tmall' not in url:
-            raise KeyError('just support for tmall.com')
         self.url = url
         self.domain = url.split('?')[0].split('/')[-2]
+        print(self.domain)
         self.products_data = {}
         html = requests.get(self.url).text
         try:
@@ -36,20 +35,22 @@ class ProductPageSpider:
             url += '&pageNo={}'.format(page_index)
         print('crawl page {}... {}'.format(page_index,url))
         page_prods= []
+        jsonp_html = requests.get(url)\
+                .text.replace('\\','').replace('|','')
+        f = open('./sample2.html','w')
+        f.write(jsonp_html)
+        f.close()
         parser = ProductPageParser(
             from_web=True,
-            html_source=requests.get(url)\
-                .text.replace('\\','').replace('|','')
+            html_source=jsonp_html
         )
         if not just_for_page_num:
             #只拿page_num时不要条目数据
             for sec in parser.sections:
                 prod_info_dict = Product(sec).to_dict()
-                for key in prod_info_dict.keys():
-                    #不允许信息不全的条目加入
+                if None==prod_info_dict['cmt_link']:
                     #这里判断已经到搜索至下方推荐条目，不再追加
-                    if None == prod_info_dict[key]:
-                        break
+                    break
                 page_prods.append(prod_info_dict)
             self.products_data[page_index] = page_prods
             print('append page {} data ok!'.format(page_index))
@@ -83,7 +84,8 @@ class ProductPageSpider:
         }
 
 if __name__=='__main__':
-    spider = ProductPageSpider(url='https://qyxcy.tmall.com/search.htm?search=y&orderType=newOn_desc&tsearch=y')
+    #spider = ProductPageSpider(url='https://qyxcy.tmall.com/search.htm?search=y&orderType=newOn_desc&tsearch=y')
+    spider = ProductPageSpider(url='https://yoho1314520.taobao.com/search.htm?spm=a1z10.1-c-s.0.0.hdbFzN&search=y&orderType=hotsell_desc')
     json = spider.get_page_num()
     #json = spider.get_products_info()
     print(json)

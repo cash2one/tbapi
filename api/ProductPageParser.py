@@ -20,7 +20,7 @@ class ProductPageParser:
     '''
     def __init__(self,html_source=None,from_web=True):
         if not from_web:
-            with open('./sample.html','rb') as f:
+            with open('./sample2.html','rb') as f:
                 html_source = f.read()
         try:
             self.soup = BeautifulSoup(html_source,'lxml')
@@ -49,10 +49,12 @@ class Product:
         return int(self.sec['data-id'])
 
     @property
-    @ERN_METHOD
     def sales(self):
         #总销量
-        return int(self.sec.select_one('.sale-num').text)
+        try:
+            return int(self.sec.select_one('.sale-num').text)
+        except:
+            pass
 
     @property
     @ERN_METHOD
@@ -88,7 +90,12 @@ class Product:
 
     @property
     def img_src(self):
-        return 'http:'+self.sec.find('img')['data-ks-lazyload']
+        try:
+            #天猫情况
+            return 'http:'+self.sec.find('img')['data-ks-lazyload']
+        except:
+            #淘宝情况
+            return 'http:'+self.sec.find('img')['src']
 
     def to_dict(self):
         return {
