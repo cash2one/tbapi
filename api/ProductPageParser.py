@@ -64,9 +64,17 @@ class Product:
 
     @property
     @ERN_METHOD
-    def price(self):
-        #价格
+    def c_price(self):
+        # 现价
         return float(self.sec.select_one('.c-price').text.strip())
+
+    @property
+    def s_price(self):
+        # 原价（天猫没有原价）
+        try:
+            return float(self.sec.select_one('.s-price').text.strip())
+        except:
+            pass
 
     @property
     @ERN_METHOD
@@ -76,6 +84,7 @@ class Product:
 
     @property
     def cmt_cot(self):
+        #评论数
         try:
             return int(self.sec.select_one('.title').find('a').text.split(' ')[-1])
         except:
@@ -83,6 +92,7 @@ class Product:
 
     @property
     def cmt_link(self):
+        #评论链接
         try:
             return 'http:'+self.sec.select_one('.title').find('a')['href']
         except:
@@ -101,7 +111,8 @@ class Product:
         return {
             'sales':self.sales,
             'title':self.title,
-            'price':self.price,
+            's_price':self.s_price,
+            'c_price': self.c_price,
             'link':self.link,
             'cmt_cot':self.cmt_cot,
             'cmt_link':self.cmt_link,
@@ -115,7 +126,8 @@ class Product:
         print('link:\t{}'.format(self.link))
         print('sales:\t{}'.format(self.sales))
         print('title:\t{}'.format(self.title))
-        print('price:\t{}'.format(self.price))
+        print('s_price:\t{}'.format(self.s_price))
+        print('c_price:\t{}'.format(self.c_price))
         print('img_src:\t{}'.format(self.img_src))
         print('cmt_cot:\t{}'.format(self.cmt_cot))
         print('cmt_link:\t{}'.format(self.cmt_link))
