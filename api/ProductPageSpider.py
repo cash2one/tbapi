@@ -37,9 +37,11 @@ class ProductPageSpider:
         page_prods= []
         jsonp_html = requests.get(url)\
                 .text.replace('\\','').replace('|','')
+        '''
         f = open('./sample2.html','w')
         f.write(jsonp_html)
         f.close()
+        '''
         parser = ProductPageParser(
             from_web=True,
             html_source=jsonp_html
