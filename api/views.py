@@ -24,7 +24,7 @@ def get_store_info(request):
     store_url = request.GET.get('store_url')
     print('receive store url: ',store_url)
     res = StoreInfoGenerator(store_url).to_json()
-    print('merge result: ',res)
+    #print('merge result: ',res)
     if res not in [-1,-2]:
         ret['status'] = 1
         ret['data'] = res
