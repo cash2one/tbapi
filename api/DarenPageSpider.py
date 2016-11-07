@@ -111,7 +111,7 @@ class DarenPageSpider:
         if page_num==0:
             print('No items in this daren page')
             return
-        print('page_index:{}  url:{}'\
+        print('page_num: {}  url:{}'\
                 .format(page_num,category_url))
         category_data['page_nums'] = list(
             range(1,first_page_parser.page_num+1))
@@ -121,10 +121,10 @@ class DarenPageSpider:
                     range(1,first_page_parser.page_num+1)
         ]
         #print(cate_url_page_indexs)
-        if page_num<16:
+        if page_num<4:
             iner_cot = page_num
         else:
-            iner_cot = 16
+            iner_cot = 4
         pool = ThreadPool(iner_cot)
         pool.map(self.crawl_per_page,cate_url_page_indexs)
         pool.close()
@@ -138,18 +138,21 @@ class DarenPageSpider:
         category_data = cate_url_page_index_data_dict[2]
         page_url = category_url + '&page={}'.format(page_index)
         page_parser = DarenPageParser(
-            html_source=request_with_ipad(page_url).text
+            html_source=request_with_ipad(page_url).text,
+            domain = self.domain
         )
         prods = page_parser.get_prods_list_by_json()
         # 能找到瀑布流（html中蕴含的json）直接通过其得到信息
         # 不能就做bs4解析拿信息（涉及到template 1 2 3的问题）
+        '''
         if prods==[]:
             for sec in page_parser.sections:
                 prod = Product(div_section=sec, domain=category_url)
                 # prod.show_in_cmd()
                 prods.append(prod.to_dict())
-        print('crawl items: {} , url: {}'\
-              .format(len(prods),page_url))
+        '''
+        print('crawl prods: {} in page {}, category_url: {}'\
+              .format(len(prods),page_index,page_url))
         category_data['page_data'][page_index] = prods
 
     def to_json(self):

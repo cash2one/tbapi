@@ -57,3 +57,40 @@ def json_response(func):
         return HttpResponse(data)#这里是返回给我的环境
     return decorator
 
+
+import requests
+def request_with_ipad(url):
+    for i in range(5):
+        try:
+            return requests.get(url,
+                headers={'user-agent': 'Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5")'}
+            )
+        except:
+            pass
+
+def get_item_dicts(json_str):
+    item_dicts = []
+    for prod in json_str.split('}, {'):
+        # print(prod)
+        jd = {}
+        for kv in prod.split(', '):
+            # print(kv)
+            k = kv.split('=')[0].strip().strip('[{')
+            try:
+                v = kv.split('=')[1].strip().strip('}]')
+            except:
+                continue
+            if '\r' in v or '[' in v:
+                continue
+            if v in ['{','}','[',']']:
+                continue
+            if v == 'null':
+                v = None
+            try:
+                v = int(v)
+            except:
+                pass
+            jd[k] = v
+        # print(jd)
+        item_dicts.append(jd)
+    return item_dicts

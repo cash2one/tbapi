@@ -9,13 +9,17 @@
 @description:
         用于解析达人页的商品列表
 """
-import json
+import json,re
 from bs4 import BeautifulSoup
+from multiprocessing.dummy import Pool as ThreadPool
+from .func import request_with_ipad,get_item_dicts
 from .decorators import except_return_none
 ERN_METHOD = lambda func:except_return_none(func,ModelName='DarenPageParser')
 
 class DarenPageParser:
-    def __init__(self,html_source=None,from_web=True,redirect_domain=False):
+    def __init__(self,html_source=None,from_web=True,domain=None):
+        if domain:
+            self.domain = domain
         if not from_web:
             with open('./daren.html','rb') as f:
                 html_source = f.read()
@@ -90,43 +94,49 @@ class DarenPageParser:
             return []
         else:
             return ProdsInfoGenerator(
-                html_source=self.html_source
+                html_source=self.html_source,
+                domain = self.domain
             ).to_list()
 
 
 class ProdsInfoGenerator:
-    def __init__(self,html_source):
-        #print(html_source)
+    def __init__(self,html_source,domain=None):
+        if domain:
+            self.domain = domain
+        self.soup = BeautifulSoup(html_source,'html.parser')
         self.json_str = html_source.split('daogouContents :   ')[1]\
                             .split('-->\r\n<')[0]
-        self.pre_handle()
+        self.jds = []
 
     @ERN_METHOD
-    def pre_handle(self):
-        self.jds = []
-        for prod in self.json_str.split('}, {'):
-            # print(prod)
-            jd = {}
-            for kv in prod.split(', '):
-                # print(kv)
-                k = kv.split('=')[0].strip()
-                try:
-                    v = kv.split('=')[1].strip()
-                except:
-                    continue
-                if '\r' in v:
-                    continue
-                if v == 'null':
-                    v = None
-                try:
-                    v = int(v)
-                except:
-                    pass
-                jd[k] = v
-            #print(jd)
-            self.jds.append(jd)
+    def get_prod_url(self,prod_id):
+        if isinstance(prod_id,int):
+            prod_id = str(prod_id)
+        return self.domain + self.soup.find('a',attrs={'href':re.compile(prod_id)})['href']
+
+    def get_prod_detail(self,prod_id):
+        prod_url = self.get_prod_url(
+            prod_id = prod_id)
+        detail_page_html = request_with_ipad(prod_url).text
+        json_str = detail_page_html.split('<!--  contentPage :   {content=')[1]\
+                        .split(' -->')[0]
+        prod = get_item_dicts(json_str)[0]
+        print('crawl {} ok'.format(prod_id))
+        self.jds.append(prod)
+
+    def unit_crawl_detail(self,item):
+        if item['typeValue']==1:
+            self.get_prod_detail(prod_id=item['id'])
+
+    def run(self):
+        item_dicts = get_item_dicts(json_str=self.json_str)
+        pool = ThreadPool(32)
+        pool.map(self.unit_crawl_detail,item_dicts)
+        pool.close()
+        pool.join()
 
     def to_list(self):
+        self.run()
         return self.jds
 
 
@@ -188,13 +198,6 @@ class Product:
 
 if __name__=="__main__":
     import requests
-    domain = 'http://ku.uz.taobao.com'
+    domain = 'http://qzktt.uz.taobao.com/'
     html = requests.get(domain).text
-    parser = DarenPageParser(html_source=html)
-    #print(parser.sections)
-    #print(parser.page_num)
-    print(parser.category_urls_id_names)
-    '''
-    for sec in parser.sections:
-        Product(div_section=sec,domain=domain).show_in_cmd()
-    '''
+    ProdsInfoGenerator(html_source=html,domain=domain[:-1]).to_list()
