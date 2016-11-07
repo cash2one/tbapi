@@ -39,7 +39,7 @@ def json_response(func):
         tm.start()
         objects = func(request, *args, **kwargs)
         tm.end()
-        print('Response time: {} s'.format(tm.gap))
+        print('Response time: {} s\n'.format(tm.gap))
         if isinstance(objects, HttpResponse):
             return object#服务端不希望返回jsonp的情况
         try:

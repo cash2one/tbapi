@@ -148,7 +148,7 @@ class DarenPageSpider:
                 prod = Product(div_section=sec, domain=category_url)
                 # prod.show_in_cmd()
                 prods.append(prod.to_dict())
-        print('抓取条目: {} 个, url: {}'\
+        print('crawl items: {} , url: {}'\
               .format(len(prods),page_url))
         category_data['page_data'][page_index] = prods
 
