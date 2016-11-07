@@ -15,7 +15,7 @@ from .decorators import except_return_none
 ERN_METHOD = lambda func:except_return_none(func,ModelName='DarenPageParser')
 
 class DarenPageParser:
-    def __init__(self,html_source=None,from_web=True):
+    def __init__(self,html_source=None,from_web=True,redirect_domain=False):
         if not from_web:
             with open('./daren.html','rb') as f:
                 html_source = f.read()
@@ -24,6 +24,19 @@ class DarenPageParser:
             self.soup = BeautifulSoup(html_source,'lxml')
         except:
             self.soup = BeautifulSoup(html_source,'html.parser')
+
+    @property
+    def template_type(self):
+        if self.soup.select('.water-item')!=[]:
+            #sample url: http://youup.uz.taobao.com/
+            return 1
+        if self.soup.select('.J_SiteSItem')!=[]:
+            # sample url: http://chaoliudapei.uz.taobao.com/
+            return 2
+        if self.soup.select('.li-ite')!=[]:
+            return 3
+        #-1时初步可推断主页无条目
+        return -1
 
     @property
     @ERN_METHOD
@@ -36,35 +49,54 @@ class DarenPageParser:
     def page_num(self):
         #本页所表征的页数
         try:
-            return int(self.soup.select_one('.count').text.strip('共').strip('页'))
-        except:
-            try:
+            if self.template_type==2:
+                return int(self.soup.select_one('.count').text.strip('共').strip('页'))
+            if self.template_type==1:
                 return int(self.soup.select_one('.paginator').find_all('a')[-2].text)
-            except:
-                return 1
+            if self.template_type==-1:
+                return 0
+        except:
+            return 1
 
     @property
     def category_urls_id_names(self):
         #在解析首页时，返回该商铺的子标签信息元组(url,id)
         #注意为了使请求数最少，每页的请求size调至最大的500
+        print('template type: {}'.format(self.template_type))
+        #仅支持category
         try:
             return [
                 ( 'http:'+a['href']+'&page_size=500', a['href'].split('=')[-1], a.text )
                     for a in self.soup.select_one('.dz_dhh').find_all('a')
             ][1:-1]
         except:
-            print('No sub category in this daren home page')
-            return []
+            pass
+        #未支持tag
+        '''
+        if self.type==2:
+            tag_alist = self.soup.select_one('.site-cate-item').find_all('a')
+            print(tag_alist)
+            return [
+                ('http:' + a['href'] + '&page_size=500', a['href'].split('=')[-1], a.text)
+                    for a in tag_alist
+            ][1:-1]
+        '''
+        print('No sub category in this daren home page')
+        return []
 
-    def get_prods_list(self):
+    def get_prods_list_by_json(self):
         #第二阶段对json数据的直接索取（不通过product解析类）
-        return ProdsInfoGenerator(
-            html_source=self.html_source
-        ).to_list()
+        if self.template_type==-1:
+            return []
+        else:
+            return ProdsInfoGenerator(
+                html_source=self.html_source
+            ).to_list()
 
 
 class ProdsInfoGenerator:
     def __init__(self,html_source):
+        #print(html_source)
         self.json_str = html_source.split('daogouContents :   ')[1]\
                             .split('-->\r\n<')[0]
         self.pre_handle()
@@ -161,7 +193,7 @@ if __name__=="__main__":
     parser = DarenPageParser(html_source=html)
     #print(parser.sections)
     #print(parser.page_num)
-    print(parser.category_urls_ids)
+    print(parser.category_urls_id_names)
     '''
     for sec in parser.sections:
         Product(div_section=sec,domain=domain).show_in_cmd()
