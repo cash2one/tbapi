@@ -85,6 +85,6 @@ def get_daren_prods(request):
     except KeyError as e:
         ret['message'] = str(e)
     except Exception as e:
-        ret['message'] = 'check daren page url'
+        ret['message'] = 'check daren page url,server except as [{}]'.format(str(e))
         print(e)
     return ret
