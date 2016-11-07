@@ -111,8 +111,8 @@ class DarenPageSpider:
         if page_num==0:
             print('No items in this daren page')
             return
-        print('cgName:{}  page_index:{}  url:{}'\
-                .format(category_name,page_num,category_url))
+        print('page_index:{}  url:{}'\
+                .format(page_num,category_url))
         category_data['page_nums'] = list(
             range(1,first_page_parser.page_num+1))
         cate_url_page_indexs = [
