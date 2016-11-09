@@ -57,6 +57,11 @@ def json_response(func):
         return HttpResponse(data)#这里是返回给我的环境
     return decorator
 
+from datetime import datetime, timedelta, timezone
+def get_beijing_time(format='%Y-%m-%d %H:%M:%S'):
+    utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc)
+    return utc_dt.astimezone(timezone(timedelta(hours=8))) \
+        .strftime(format)
 
 import requests
 def request_with_ipad(url):
