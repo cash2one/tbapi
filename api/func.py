@@ -64,13 +64,14 @@ def get_beijing_time(format='%Y-%m-%d %H:%M:%S'):
         .strftime(format)
 
 import requests
-def request_with_ipad(url):
+def request_with_ipad(url,time_out=3):
     for i in range(5):
         try:
-            return requests.get(url,
+            return requests.get(url,timeout=time_out,
                 headers={'user-agent': 'Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5")'}
             )
-        except:
+        except Exception as e:
+            #print(str(e))
             pass
 
 def get_item_dicts(json_str):

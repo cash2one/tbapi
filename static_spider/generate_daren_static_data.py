@@ -11,16 +11,8 @@
 """
 
 import os,pymysql,requests,json,time
-
-import sys
-up_level_N = 2
-SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
-root_dir = SCRIPT_DIR
-for i in range(up_level_N):
-    root_dir = os.path.normpath(os.path.join(root_dir, '..'))
-    sys.path.append(root_dir)
-
-from api.func import Timer,get_beijing_time
+os.path.join('../api')
+from api.func import Timer,get_beijing_time,request_with_ipad
 from ProdPageParser import ProdPageParser
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -29,6 +21,8 @@ class DarenStaticDataGenerator:
         self.start = start
         self.end = end
         self.white_users = self.load_white_users()
+        print('load {} white users'\
+              .format(len(self.white_users)))
 
     def load_white_users(self):
         with open('./white_users','r') as f:
@@ -48,18 +42,22 @@ class DarenStaticDataGenerator:
 
     def get_prod_info(self,prod_id):
         prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
-        resp = requests.get(prod_url)
+        resp = request_with_ipad(prod_url,time_out=100)
         if resp.status_code==404:
             #print('Fail crawl {}:{}'.format(prod_id,prod_url))
             return 404
         detail_page_html = resp.text
         prod = ProdPageParser(
             html=detail_page_html).to_dict()
-        print('SUCCESS crawl {}: {}'.format(prod_id,prod_url))
+        index = prod_id - self.start
+        print('[{}]SUCCESS crawl {}: {}'\
+              .format(index,prod_id,prod_url))
         prod['darenNoteUrl'] = prod_url
         return prod
 
-    def crawl_per_prod(self,prod_id):
+    def crawl_per_prod(self,prod_id_and_buffer_sql):
+        prod_id = prod_id_and_buffer_sql[0]
+        buffer_sql = prod_id_and_buffer_sql[1]
         prod = self.get_prod_info(prod_id)
         if prod==404:
             return False
@@ -67,13 +65,13 @@ class DarenStaticDataGenerator:
             #访问正常，但无效数据
             return True
         prod['darenNoteId'] = prod_id
-        if not self.write_json(prod):
-            return False
         for key in prod.keys():
             #print(key,prod[key])
             if isinstance(prod[key],str) and "'" in prod[key]:
                 prod[key] = prod[key].replace("'",'')
-        sql = "insert into t_daren_goodinfo(darenId,darenNoteId,darenNoteUrl,darenNoteTitle,darenNoteCover,darenNotePubDate,darenNoteReason,goodId,goodUrl,createTime) \
+        if not self.write_json(prod):
+            return False
+        sql = "insert into t_daren_goodinfo(darenId,darenNoteId,darenNoteUrl,darenNoteTitle,darenNoteCover,darenNotePubDate,darenNoteReason,goodId,goodUrl,createTime)\
                 VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')"\
                 .format(
                     prod['userId'],prod['darenNoteId'],prod['darenNoteUrl'],\
@@ -85,12 +83,11 @@ class DarenStaticDataGenerator:
             sql_name = 'baimingdan.sql'
         else:
             sql_name = 'dav.sql'
-        with open('{}/{}'.format(
-                self.root_dir,sql_name),'ab') as f:
-            f.write('{};'.format(sql).encode('utf-8'))
+        buffer_sql[sql_name] += sql+';'
+        print('add ok')
         if self.mysql:
-            return self.save_to_mysql(sql)
-        return False
+            self.save_to_mysql(sql)
+        return True
 
     def save_to_mysql(self,sql):
         #print(sql)
@@ -142,7 +139,7 @@ class DarenStaticDataGenerator:
             self.cur = self.conn.cursor()
         pool = ThreadPool(thread_cot)
         cur = self.start
-        dynamic_range_length = 100
+        dynamic_range_length = 1000
         err_cot = 0
         success_cot = 0
         ex_tm = Timer()
@@ -151,7 +148,21 @@ class DarenStaticDataGenerator:
         while(cur<self.end):
             tm.start()
             little_range = range(cur,cur+dynamic_range_length)
-            res = pool.map(self.crawl_per_prod,little_range)
+            buffer_dav_sql = ''
+            buffer_white_sql = ''
+            sql_kv = {
+                'baimingdan.sql': buffer_white_sql,
+                'dav.sql': buffer_dav_sql
+            }
+            res = pool.map(self.crawl_per_prod,
+                    [ (prod_id,sql_kv) for prod_id in little_range ])
+            #print(res)
+            for key in sql_kv.keys():
+                sql_name = key
+                sql = sql_kv[sql_name]
+                with open('{}/{}'.format(
+                        self.root_dir, sql_name), 'ab') as f:
+                    f.write('{};'.format(sql).encode('utf-8'))
             tm.end()
             ex_tm.end()
             success_cot += res.count(True)
