@@ -38,8 +38,10 @@ class ProdPageParser:
         if not from_web:
             with open('prod_sample.html','rb') as f:
                 html = f.read()
-        self.soup = BS(html,'lxml')
-
+        try:
+            self.soup = BS(html,'lxml')
+        except:
+            self.soup = BS(html,'html.parser')
 
     @property
     @ERN_METHOD

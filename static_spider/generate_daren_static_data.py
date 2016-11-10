@@ -11,6 +11,15 @@
 """
 
 import os,pymysql,requests,json,time
+
+import sys
+up_level_N = 2
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+root_dir = SCRIPT_DIR
+for i in range(up_level_N):
+    root_dir = os.path.normpath(os.path.join(root_dir, '..'))
+    sys.path.append(root_dir)
+
 from api.func import Timer,get_beijing_time
 from ProdPageParser import ProdPageParser
 from multiprocessing.dummy import Pool as ThreadPool
@@ -72,7 +81,7 @@ class DarenStaticDataGenerator:
                      prod['darenNotePubDate'],prod['darenNoteReason'],\
                      prod['goodId'],prod['goodUrl'],get_beijing_time()
                 )
-        if prod['userId'] in self.white_users:
+        if int(prod['userId']) in self.white_users:
             sql_name = 'baimingdan.sql'
         else:
             sql_name = 'dav.sql'
