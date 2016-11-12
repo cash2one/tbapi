@@ -10,9 +10,7 @@
             --
 """
 
-import os,pymysql,requests,json,time
-
-import sys
+import sys,os
 up_level_N = 2
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 root_dir = SCRIPT_DIR
@@ -20,19 +18,28 @@ for i in range(up_level_N):
     root_dir = os.path.normpath(os.path.join(root_dir, '..'))
     sys.path.append(root_dir)
 
-from api.func import Timer,get_beijing_time
-from ProdPageParser import ProdPageParser
+import pymysql,requests,json,time
+from api.func import Timer,get_beijing_time,request_with_ipad
+from .ProdPageParser import ProdPageParser
 from multiprocessing.dummy import Pool as ThreadPool
 
 class DarenStaticDataGenerator:
     def __init__(self,start,end):
         self.start = start
         self.end = end
+        self.gap = end - start
         self.white_users = self.load_white_users()
+        print('load white users: {}'.format(
+            len(self.white_users)))
 
     def load_white_users(self):
-        with open('./white_users','r') as f:
-            return [ int(line.strip('\n')) for line in f.readlines() ]
+        for maybe_path in ['./white_users','static_spider/white_users']:
+            try:
+                with open(maybe_path,'r') as f:
+                    return [ int(line.strip('\n')) for line in f.readlines() ]
+            except:
+                continue
+        return []
 
     def mkdir_daren(self):
         time_str = get_beijing_time(format='%Y_%m_%d_%H_%M_%S')
@@ -48,14 +55,15 @@ class DarenStaticDataGenerator:
 
     def get_prod_info(self,prod_id):
         prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
-        resp = requests.get(prod_url)
+        resp = request_with_ipad(prod_url)
         if resp.status_code==404:
             #print('Fail crawl {}:{}'.format(prod_id,prod_url))
             return 404
         detail_page_html = resp.text
         prod = ProdPageParser(
             html=detail_page_html).to_dict()
-        print('SUCCESS crawl {}: {}'.format(prod_id,prod_url))
+        print('[{}/{}] SUCCESS crawl {}: {}'\
+              .format(prod_id-self.start,self.gap,prod_id,prod_url))
         prod['darenNoteUrl'] = prod_url
         return prod
 
@@ -127,8 +135,9 @@ class DarenStaticDataGenerator:
             f.write(json.dumps(jd))
         return True
 
-    def run(self,mysql=True,thread_cot=32):
+    def run(self,mysql=True,thread_cot=32,dynamic_range_length=1000):
         self.mysql = mysql
+        self.dynamic_range_length = dynamic_range_length
         self.mkdir_daren()
         if mysql==True:
             self.conn = pymysql.connect(
@@ -142,7 +151,6 @@ class DarenStaticDataGenerator:
             self.cur = self.conn.cursor()
         pool = ThreadPool(thread_cot)
         cur = self.start
-        dynamic_range_length = 100
         err_cot = 0
         success_cot = 0
         ex_tm = Timer()
@@ -150,7 +158,8 @@ class DarenStaticDataGenerator:
         tm = Timer()
         while(cur<self.end):
             tm.start()
-            little_range = range(cur,cur+dynamic_range_length)
+            little_range = list(range(
+                cur,cur+dynamic_range_length))
             res = pool.map(self.crawl_per_prod,little_range)
             tm.end()
             ex_tm.end()
@@ -169,5 +178,5 @@ class DarenStaticDataGenerator:
 if __name__=="__main__":
     generator = DarenStaticDataGenerator(5732587480,57325881000)
     #generator.crawl_per_prod('5732587480')
-    generator.run(mysql=False,thread_cot=32)
+    generator.run(mysql=False,thread_cot=32,dynamic_range_length=1000)
     #generator.load_white_users()

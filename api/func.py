@@ -99,3 +99,9 @@ def get_item_dicts(json_str):
         # print(jd)
         item_dicts.append(jd)
     return item_dicts
+
+def try_int(val):
+    try:
+        return int(val)
+    except:
+        return val
