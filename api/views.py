@@ -103,7 +103,10 @@ def random_kick(request):
     for key in request.GET:
         rq_dict[key] = try_int(request.GET[key])
         #参数不全则用默认字典value
-    print(rq_dict)
+    if 'dynamic_range_length' in rq_dict.keys() and \
+            rq_dict['dynamic_range_length'] > 300000:
+        ret['message'] = 'dynamic_range_length need < 300000'
+        return ret
     try:
         generator = DarenStaticDataGenerator(
             start = rq_dict['start'],

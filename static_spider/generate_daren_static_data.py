@@ -20,6 +20,7 @@ for i in range(up_level_N):
 
 import pymysql,requests,json,time
 from api.func import Timer,get_beijing_time,request_with_ipad
+from api.models import t_daren_goodinfo
 from .Email import Email
 from .ProdPageParser import ProdPageParser
 from multiprocessing.dummy import Pool as ThreadPool
@@ -98,13 +99,14 @@ class DarenStaticDataGenerator:
                 self.root_dir,sql_name),'ab') as f:
             f.write('{};'.format(sql).encode('utf-8'))
         if self.mysql:
-            self.save_to_mysql(sql)
+            #self.save_to_mysql(sql)
+            self.save_to_mysql_by_django_orm(prod)
         if int(prod['userId']) in self.white_users:
             return 'bmd add'
         else:
             return 'dav add'
 
-    def save_to_mysql(self,sql):
+    def save_to_mysql_by_sql(self,sql):
         #print(sql)
         try:
             self.cur.execute(sql)
@@ -113,6 +115,22 @@ class DarenStaticDataGenerator:
             print('save to mysql : Duplicate')
         except Exception as e:
             print('error in save to mysql:{}'.format(str(e)))
+
+    def save_to_mysql_by_django_orm(self,prod):
+        db_info = t_daren_goodinfo()
+        #db_info.createTime = prod['createTime']
+        db_info.darenId = prod['userId']
+        db_info.darenNoteId = prod['darenNoteId']
+        db_info.darenNoteUrl = prod['darenNoteUrl']
+        db_info.darenNoteTitle = prod['darenNoteTitle']
+        db_info.darenNoteCover = prod['darenNoteCover']
+        db_info.darenNotePubDate = prod['darenNotePubDate']
+        db_info.goodId = prod['goodId']
+        db_info.goodUrl = prod['goodUrl']
+        try:
+            db_info.save()
+        except:
+            print('save to mysql : Duplicate')
 
     def write_json(self,prod):
         userId = int(prod['userId'])
@@ -161,7 +179,7 @@ class DarenStaticDataGenerator:
         self.mysql = mysql
         self.dynamic_range_length = dynamic_range_length
         self.mkdir_daren()
-        if mysql==True:
+        if mysql:
             self.conn = pymysql.connect(
                 host = '123.57.213.217',
                 database = 'spiderpython',
@@ -203,13 +221,13 @@ class DarenStaticDataGenerator:
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
-                mail_address = '763038567@qq.com'
+                mail_address = '965606089@qq.com'
             )
             print('--------')
         self.send_mail(
                 subject='本次达人历史抓取数据完成[{}]'.format(get_beijing_time()),
                 content = 'rt',
-                mail_address = '763038567@qq.com'
+                mail_address = '965606089@qq.com'
             )
         pool.close()
         pool.join()
