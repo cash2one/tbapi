@@ -200,7 +200,7 @@ class DarenStaticDataGenerator:
                 subject = '打点数量{},命中白名单{}条，其余{}条'\
                     .format(dynamic_range_length,bmd_success,dav_success),
                 content = '打点范围[{},{}]'.format(cur,cur+dynamic_range_length),
-                mail_address = '965606089@qq.com'
+                mail_address = '763038567@qq.com'
             )
             print('--------')
         pool.close()

@@ -33,5 +33,5 @@ urlpatterns = [
         http://127.0.0.1:8000/get_page_num?products_url=https://qyxcy.tmall.com/search.htm?search=y&orderType=newOn_desc&tsearch=y
         http://127.0.0.1:8000/get_products_info?products_url=https://qyxcy.tmall.com/search.htm?search=y&orderType=newOn_desc&tsearch=y
         http://127.0.0.1:8000/get_daren_prods?daren_url=http://ku.uz.taobao.com/
-        http://127.0.0.1:8000/random_kick?start=5732587480&end=5732587580&dynamic_range_length=100
+        http://127.0.0.1:8000/random_kick?start=5732587480&end=5732588480&dynamic_range_length=1000&mysql=1
 '''
