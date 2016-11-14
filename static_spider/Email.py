@@ -23,7 +23,7 @@ class Email:
             self,sender,receiver,subject,content,
             subtype='plain',img_src=None
     ):
-        if float(platform.python_version()[:3])>3.5:
+        if float(platform.python_version()[:3])>3.3:
             raise ImportError('Email Class():Please use python version under 3.4')
         self.msg = MIMEMultipart('mixed')
         msgText = MIMEText(content,_subtype=subtype,_charset='utf-8')
@@ -39,7 +39,7 @@ class Email:
         self.msg['To'] = receiver
         self.sender = sender
         self.receiver = receiver
-        self.smtp = smtplib.SMTP()
+        self.smtp = smtplib.SMTP('smtp.qq.com')
 
     def conn_server(self,host,port):
         #连接服务器,并启动tls服务
@@ -68,3 +68,21 @@ class Email:
 
     def close(self):
         self.smtp.close()
+
+if __name__=="__main__":
+    emailAI = Email(
+            receiver = '965606089@qq.com',
+            sender = 'luyangaini@vip.qq.com',
+            subject = '123',
+            content = '123'
+              )
+    emailAI.conn_server(
+        host='smtp.qq.com',
+        port = 587
+    )
+    emailAI.login(
+        username='luyangaini@vip.qq.com',
+        password='ptuevbbulatcbcfh'
+    )
+    emailAI.send()
+    emailAI.close()
