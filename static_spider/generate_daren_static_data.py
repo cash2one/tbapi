@@ -129,7 +129,9 @@ class DarenStaticDataGenerator:
         db_info.goodUrl = prod['goodUrl']
         try:
             db_info.save()
-        except:
+            print('save to mysql : Ok')
+        except Exception as e:
+            #print(str(e))
             print('save to mysql : Duplicate')
 
     def write_json(self,prod):
@@ -221,13 +223,13 @@ class DarenStaticDataGenerator:
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
-                mail_address = '965606089@qq.com'
+                mail_address = '763038567@qq.com'
             )
             print('--------')
         self.send_mail(
                 subject='本次达人历史抓取数据完成[{}]'.format(get_beijing_time()),
                 content = 'rt',
-                mail_address = '965606089@qq.com'
+                mail_address = '763038567@qq.com'
             )
         pool.close()
         pool.join()
