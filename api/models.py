@@ -16,14 +16,14 @@ from django.utils import timezone
 class t_daren_goodinfo(models.Model):
     class Meta:
         db_table = 't_daren_goodinfo'
-    darenId = models.CharField()#prod['userId']
-    darenNoteId = models.CharField()
-    darenNoteUrl = models.CharField()
-    darenNoteTitle = models.CharField()
-    darenNoteCover = models.CharField()
-    darenNotePubDate = models.CharField()
-    darenNoteReason = models.CharField()
-    goodId = models.CharField()
-    goodUrl = models.CharField()
+    darenId = models.CharField(max_length=500)#prod['userId']
+    darenNoteId = models.CharField(max_length=500)
+    darenNoteUrl = models.CharField(max_length=500)
+    darenNoteTitle = models.CharField(max_length=500)
+    darenNoteCover = models.CharField(max_length=500)
+    darenNotePubDate = models.CharField(max_length=500)
+    darenNoteReason = models.CharField(max_length=500)
+    goodId = models.CharField(max_length=500)
+    goodUrl = models.CharField(max_length=500)
     createTime = models.TimeField(default=timezone.now())
 
