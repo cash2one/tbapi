@@ -23,7 +23,7 @@ class Email:
             self,sender,receiver,subject,content,
             subtype='plain',img_src=None
     ):
-        if float(platform.python_version()[:3])>3.3:
+        if float(platform.python_version()[:3])>3.4:
             raise ImportError('Email Class():Please use python version under 3.4')
         self.msg = MIMEMultipart('mixed')
         msgText = MIMEText(content,_subtype=subtype,_charset='utf-8')
