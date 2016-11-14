@@ -206,6 +206,11 @@ class DarenStaticDataGenerator:
                 mail_address = '763038567@qq.com'
             )
             print('--------')
+        self.send_mail(
+                subject='本次达人历史抓取数据完成[{}]'.format(get_beijing_time()),
+                content = 'rt',
+                mail_address = '763038567@qq.com'
+            )
         pool.close()
         pool.join()
 
