@@ -52,7 +52,7 @@ class Email:
     def login(self,username,password):
         try:
             self.smtp.login(username, password)
-            log_string = username+'登陆成功'+'\n'
+            log_string = username+'login success'+'\n'
             print(log_string)#可以考虑写在日志里
         except Exception as e:
             print('login():',e)
@@ -60,33 +60,10 @@ class Email:
     def send(self):
         try:
             self.smtp.sendmail(self.sender, self.receiver, self.msg.as_string())
-            log_string = '邮件已投至'+self.receiver+'\n'
+            log_string = 'email has been sent to '+self.receiver+'\n'
             print(log_string)
         except Exception as e:
             print('send():',e)
 
     def close(self):
         self.smtp.close()
-
-
-def remind_me(admin_address):
-    emailAI = Email(
-        receiver = admin_address,
-        sender   = 'luyangaini@vip.qq.com',
-        subject  = '爬虫一小时没采到信息了，上线看看吧',
-        content  = 'rt',
-    )
-    emailAI.conn_server(
-        host='smtp.qq.com',
-        port = 587
-    )
-    emailAI.login(
-        username='luyangaini@vip.qq.com',
-        password='ptuevbbulatcbcfh'
-    )
-    emailAI.send()
-    emailAI.close()
-
-
-if __name__=='__main__':
-    map(remind_me,['965606089@qq.com','gaotongfei1995@gmail.com'])
