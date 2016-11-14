@@ -112,7 +112,7 @@ class DarenStaticDataGenerator:
         except pymysql.err.IntegrityError:
             print('save to mysql : Duplicate')
         except Exception as e:
-            print('error sql : {}\n{}'.format(sql,str(e)))
+            print('error sql')
 
     def write_json(self,prod):
         userId = int(prod['userId'])
