@@ -190,7 +190,6 @@ class DarenStaticDataGenerator:
             gap_fail = res.count(False)
             success_cot += (dav_success+bmd_success)
             err_cot += gap_fail
-            cur += dynamic_range_length
             print('{}, {}, {}%, {} s, {} s'.format(
                 success_cot,err_cot,
                 int((success_cot/err_cot)*100),
@@ -199,6 +198,8 @@ class DarenStaticDataGenerator:
             content = '达人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
                 cur,cur+dynamic_range_length,dynamic_range_length,bmd_success,dav_success,tm.gap
             )
+            #print(content)
+            cur += dynamic_range_length
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,

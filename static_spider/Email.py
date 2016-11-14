@@ -7,8 +7,7 @@
 @editor:    PyCharm
 @create:    2016-8-12 14:30
 @description:
-            smtp发送邮件，对email类做一个简单的封装,
-            注意python3.3以上smtp.starttls()会报错
+            smtp发送邮件，对email类做一个简单的封装
 """
 
 import smtplib
