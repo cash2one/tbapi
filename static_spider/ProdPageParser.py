@@ -76,11 +76,9 @@ class ProdPageParser:
             pass
 
     @property
+    @ERN_METHOD
     def darenNoteTitle(self):
-        try:
-            return self.soup.select_one('.yaHei-title > a').text.strip()
-        except:
-            pass
+        return self.soup.select_one('.detail > .yaHei-title > a').text.strip()
 
     def to_dict(self):
         if self.goodUrl==None:

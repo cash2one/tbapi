@@ -75,7 +75,16 @@ WSGI_APPLICATION = 'tb_api_server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-DATABASES = {}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'spiderpython',
+        'USER': 'root',
+        'PASSWORD': 'xingguang@123',
+        'HOST': '123.57.213.217',
+        'PORT': 3306,
+    }
+}
 
 
 # Internationalization
