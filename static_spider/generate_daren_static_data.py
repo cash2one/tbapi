@@ -112,7 +112,7 @@ class DarenStaticDataGenerator:
         except pymysql.err.IntegrityError:
             print('save to mysql : Duplicate')
         except Exception as e:
-            print('error sql')
+            print('error in save to mysql:{}'.format(str(e)))
 
     def write_json(self,prod):
         userId = int(prod['userId'])
@@ -202,7 +202,7 @@ class DarenStaticDataGenerator:
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
-                mail_address = '965606089@qq.com'
+                mail_address = '763038567@qq.com'
             )
             print('--------')
         pool.close()
