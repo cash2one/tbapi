@@ -45,6 +45,7 @@ class Email:
         #连接服务器,并启动tls服务
         try:
             self.smtp.connect(host,port)
+            self.smtp.ehlo()
             self.smtp.starttls()
         except Exception as e:
             print('conn_server():',e)
