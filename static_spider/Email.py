@@ -52,7 +52,7 @@ class Email:
     def login(self,username,password):
         try:
             self.smtp.login(username, password)
-            log_string = username+'login success'+'\n'
+            log_string = username+' login success'+'\n'
             print(log_string)#可以考虑写在日志里
         except Exception as e:
             print('login():',e)
