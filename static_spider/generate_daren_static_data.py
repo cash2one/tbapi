@@ -98,7 +98,7 @@ class DarenStaticDataGenerator:
                 self.root_dir,sql_name),'ab') as f:
             f.write('{};'.format(sql).encode('utf-8'))
         if self.mysql:
-            return self.save_to_mysql(sql)
+            self.save_to_mysql(sql)
         if int(prod['userId']) in self.white_users:
             return 'bmd add'
         else:
@@ -196,10 +196,12 @@ class DarenStaticDataGenerator:
                 int((success_cot/err_cot)*100),
                 tm.gap, ex_tm.gap
             ))
+            content = '达人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
+                cur,cur+dynamic_range_length,dynamic_range_length,bmd_success,dav_success,tm.gap
+            )
             self.send_mail(
-                subject = '打点数量{},命中白名单{}条，其余{}条'\
-                    .format(dynamic_range_length,bmd_success,dav_success),
-                content = '打点范围[{},{}]'.format(cur,cur+dynamic_range_length),
+                subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
+                content = content,
                 mail_address = '763038567@qq.com'
             )
             print('--------')
