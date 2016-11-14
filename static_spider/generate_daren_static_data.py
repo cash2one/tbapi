@@ -20,6 +20,7 @@ for i in range(up_level_N):
 
 import pymysql,requests,json,time
 from api.func import Timer,get_beijing_time,request_with_ipad
+from .Email import Email
 from .ProdPageParser import ProdPageParser
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -98,7 +99,10 @@ class DarenStaticDataGenerator:
             f.write('{};'.format(sql).encode('utf-8'))
         if self.mysql:
             return self.save_to_mysql(sql)
-        return False
+        if int(prod['userId']) in self.white_users:
+            return 'bmd add'
+        else:
+            return 'dav add'
 
     def save_to_mysql(self,sql):
         #print(sql)
@@ -135,6 +139,24 @@ class DarenStaticDataGenerator:
             f.write(json.dumps(jd))
         return True
 
+    def send_mail(self,subject,content,mail_address):
+        emailAI = Email(
+            receiver = mail_address,
+            sender = 'luyangaini@vip.qq.com',
+            subject = subject,
+            content = content
+              )
+        emailAI.conn_server(
+            host='smtp.qq.com',
+            port = 587
+        )
+        emailAI.login(
+            username='luyangaini@vip.qq.com',
+            password='ptuevbbulatcbcfh'
+        )
+        emailAI.send()
+        emailAI.close()
+
     def run(self,mysql=True,thread_cot=32,dynamic_range_length=1000):
         self.mysql = mysql
         self.dynamic_range_length = dynamic_range_length
@@ -163,14 +185,23 @@ class DarenStaticDataGenerator:
             res = pool.map(self.crawl_per_prod,little_range)
             tm.end()
             ex_tm.end()
-            success_cot += res.count(True)
-            err_cot += res.count(False)
+            dav_success = res.count('dav add')
+            bmd_success = res.count('bmd add')
+            gap_fail = res.count(False)
+            success_cot += (dav_success+bmd_success)
+            err_cot += gap_fail
             cur += dynamic_range_length
             print('{}, {}, {}%, {} s, {} s'.format(
                 success_cot,err_cot,
                 int((success_cot/err_cot)*100),
                 tm.gap, ex_tm.gap
             ))
+            self.send_mail(
+                subject = '打点数量{},命中白名单{}条，其余{}条'\
+                    .format(dynamic_range_length,bmd_success,dav_success),
+                content = '打点范围[{},{}]'.format(cur,cur+dynamic_range_length),
+                mail_address = '965606089@qq.com'
+            )
             print('--------')
         pool.close()
         pool.join()
