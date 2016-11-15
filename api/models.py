@@ -25,5 +25,5 @@ class t_daren_goodinfo(models.Model):
     darenNoteReason = models.CharField(max_length=500)
     goodId = models.CharField(max_length=500)
     goodUrl = models.CharField(max_length=500)
-    createTime = models.TimeField(default=timezone.now())
+    createTime = models.TimeField()
 

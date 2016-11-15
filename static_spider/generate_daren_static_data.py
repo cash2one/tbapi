@@ -118,7 +118,7 @@ class DarenStaticDataGenerator:
 
     def save_to_mysql_by_django_orm(self,prod):
         db_info = t_daren_goodinfo()
-        #db_info.createTime = prod['createTime']
+        db_info.createTime = prod['createTime']
         db_info.darenId = prod['userId']
         db_info.darenNoteId = prod['darenNoteId']
         db_info.darenNoteUrl = prod['darenNoteUrl']
@@ -194,7 +194,8 @@ class DarenStaticDataGenerator:
         pool = ThreadPool(thread_cot)
         cur = self.start
         err_cot = 0
-        success_cot = 0
+        dav_success_cot = 0
+        bmd_success_cot = 0
         ex_tm = Timer()
         ex_tm.start()
         tm = Timer()
@@ -208,11 +209,12 @@ class DarenStaticDataGenerator:
             dav_success = res.count('dav add')
             bmd_success = res.count('bmd add')
             gap_fail = res.count(False)
-            success_cot += (dav_success+bmd_success)
+            dav_success_cot += dav_success
+            bmd_success_cot += bmd_success
             err_cot += gap_fail
             print('{}, {}, {}%, {} s, {} s'.format(
-                success_cot,err_cot,
-                int((success_cot/err_cot)*100),
+                dav_success_cot+bmd_success_cot,err_cot,
+                int((dav_success_cot+bmd_success_cot/err_cot)*100),
                 tm.gap, ex_tm.gap
             ))
             content = '达人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
@@ -223,13 +225,16 @@ class DarenStaticDataGenerator:
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
-                mail_address = '763038567@qq.com'
+                mail_address = '965606089@qq.com'
             )
             print('--------')
+        res_content = '本次达pkil人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
+            self.start, self.end, self.end-self.start, bmd_success_cot, dav_success_cot, ex_tm.gap
+        )
         self.send_mail(
                 subject='本次达人历史抓取数据完成[{}]'.format(get_beijing_time()),
-                content = 'rt',
-                mail_address = '763038567@qq.com'
+                content = res_content,
+                mail_address = '965606089@qq.com'
             )
         pool.close()
         pool.join()
