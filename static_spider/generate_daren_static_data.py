@@ -228,7 +228,7 @@ class DarenStaticDataGenerator:
                 mail_address = '763038567@qq.com'
             )
             print('--------')
-        res_content = '本次达pkil人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
+        res_content = '本次抓取达人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
             self.start, self.end, self.end-self.start, bmd_success_cot, dav_success_cot, ex_tm.gap
         )
         self.send_mail(
