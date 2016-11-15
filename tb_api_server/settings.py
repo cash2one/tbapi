@@ -38,7 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'gunicorn',
+    #'gunicorn',
 )
 
 MIDDLEWARE_CLASSES = (
