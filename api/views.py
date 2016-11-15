@@ -9,11 +9,11 @@
 @description:
         本模块放django路由映射的视图函数
 """
-
+from static_spider.generate_daren_static_data import DarenStaticDataGenerator
 from .SearchPageInfoGenerator import StoreInfoGenerator
 from .ProductPageSpider import ProductPageSpider
 from .DarenPageSpider import DarenPageSpider
-from .func import json_response
+from .func import json_response,try_int
 
 @json_response
 def get_store_info(request):
@@ -87,4 +87,49 @@ def get_daren_prods(request):
     except Exception as e:
         ret['message'] = 'check daren page url,server except as [{}]'.format(str(e))
         print(e)
+    return ret
+
+@json_response
+def random_kick(request):
+    ret = {'data': None, 'status': 0, 'message': None}
+    if request.method != 'GET':
+        ret['message'] = 'use GET method'
+        return ret
+    rq_dict = {
+        'mysql': False,
+        'thread_cot': 32,
+        'dynamic_range_length': 1000
+    }
+    for key in request.GET:
+        rq_dict[key] = try_int(request.GET[key])
+        #参数不全则用默认字典value
+    if 'dynamic_range_length' in rq_dict.keys() and \
+            rq_dict['dynamic_range_length'] > 300000:
+        ret['message'] = 'dynamic_range_length need < 300000'
+        return ret
+    try:
+        generator = DarenStaticDataGenerator(
+            start = rq_dict['start'],
+            end = rq_dict['end']
+        )
+        generator.run(
+            mysql=rq_dict['mysql'],
+            thread_cot=rq_dict['thread_cot'],
+            dynamic_range_length=rq_dict['dynamic_range_length']
+        )
+        ret['status'] = 1
+        ret['message'] = 'run all range item ok'
+    except Exception as e:
+        ret['message'] = str(e)
+    '''
+    generator = DarenStaticDataGenerator(
+            start = rq_dict['start'],
+            end = rq_dict['end']
+        )
+    generator.run(
+        mysql=rq_dict['mysql'],thread_cot=rq_dict['thread_cot'],
+        dynamic_range_length = rq_dict['dynamic_range_length']
+    )
+    ret['status'] = 1
+    '''
     return ret

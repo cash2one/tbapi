@@ -28,10 +28,12 @@ class ProductPageParser:
             self.soup = BeautifulSoup(html_source,'html.parser')
 
     @property
-    @ERN_METHOD
     def sections(self):
         #商品html div集合
-        return self.soup.select('.item')
+        try:
+            return self.soup.select('.item')
+        except:
+            return []
 
     @property
     def page_num(self):
