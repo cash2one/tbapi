@@ -126,7 +126,7 @@ class DarenStaticDataGenerator:
         db_info.goodUrl = prod['goodUrl']
         try:
             db_info.save()
-            print('save {} to mysql: OK'.format(db_info.goodId))
+            print('save {} to mysql: OK'.format(db_info.darenNoteId))
         except Exception as e:
             print('save to mysql ERROR: {}'.format(str(e)))
 
@@ -155,19 +155,21 @@ class DarenStaticDataGenerator:
         return True
 
     def send_mail(self,subject,content,mail_address):
+        print('email AI: sending email to {}...'\
+              .format(mail_address))
         emailAI = Email(
             receiver = mail_address,
-            sender = 'luyangaini@vip.qq.com',
+            sender = 'wxg19891225@163.com',
             subject = subject,
             content = content
               )
         emailAI.conn_server(
-            host='smtp.qq.com',
-            port = 587
+            host='smtp.163.com',
+            port = 25
         )
         emailAI.login(
-            username='luyangaini@vip.qq.com',
-            password='ptuevbbulatcbcfh'
+            username='wxg19891225@163.com',
+            password='JACKY163'
         )
         emailAI.send()
         emailAI.close()
@@ -177,17 +179,17 @@ class DarenStaticDataGenerator:
         self.dynamic_range_length = dynamic_range_length
         self.mkdir_daren()
         pool = ThreadPool(thread_cot)
-        cur = self.start
+        cur = self.end
         err_cot = 0
         dav_success_cot = 0
         bmd_success_cot = 0
         ex_tm = Timer()
         ex_tm.start()
         tm = Timer()
-        while(cur<self.end):
+        while (cur > self.start):
             tm.start()
             little_range = list(range(
-                cur,cur+dynamic_range_length))
+                cur-dynamic_range_length,cur))
             res = pool.map(self.crawl_per_prod,little_range)
             tm.end()
             ex_tm.end()
@@ -203,10 +205,10 @@ class DarenStaticDataGenerator:
                 tm.gap, ex_tm.gap
             ))
             content = '达人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
-                cur,cur+dynamic_range_length,dynamic_range_length,bmd_success,dav_success,tm.gap
+                cur-dynamic_range_length,cur,dynamic_range_length,bmd_success,dav_success,tm.gap
             )
             #print(content)
-            cur += dynamic_range_length
+            cur -= dynamic_range_length
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,

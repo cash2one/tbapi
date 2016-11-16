@@ -36,7 +36,7 @@ class Email:
         self.msg['To'] = receiver
         self.sender = sender
         self.receiver = receiver
-        self.smtp = smtplib.SMTP('smtp.qq.com')
+        self.smtp = smtplib.SMTP('smtp.163.com')
 
     def conn_server(self,host,port):
         #连接服务器,并启动tls服务
