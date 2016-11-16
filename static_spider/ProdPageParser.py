@@ -87,9 +87,11 @@ class ProdPageParser:
             return {
                 'bad_result': None
             }
+        '''
         if self.darenNoteReason=='':
             print('--------- DeBug Info ----------')
             self.show_in_cmd()
+        '''
         try:
             return {
                 "darenNoteCover": self.darenNoteCover,
