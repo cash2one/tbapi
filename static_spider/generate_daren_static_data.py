@@ -18,12 +18,13 @@ for i in range(up_level_N):
     root_dir = os.path.normpath(os.path.join(root_dir, '..'))
     sys.path.append(root_dir)
 
-import pymysql,requests,json,time
+import json,time
 from api.func import Timer,get_beijing_time,request_with_ipad
 from api.models import t_daren_goodinfo
 from .Email import Email
 from .ProdPageParser import ProdPageParser
 from multiprocessing.dummy import Pool as ThreadPool
+
 
 class DarenStaticDataGenerator:
     def __init__(self,start,end):
@@ -45,7 +46,7 @@ class DarenStaticDataGenerator:
 
     def mkdir_daren(self):
         time_str = get_beijing_time(format='%Y_%m_%d_%H_%M_%S')
-        print(time_str)
+        print('mkdir: {}/'.format(time_str))
         if 'DarenData' not in os.listdir('./'):
             os.mkdir('./DarenData')
         new_dir = './DarenData/{}'.format(time_str)
@@ -62,8 +63,10 @@ class DarenStaticDataGenerator:
             #print('Fail crawl {}:{}'.format(prod_id,prod_url))
             return 404
         detail_page_html = resp.text
-        prod = ProdPageParser(
-            html=detail_page_html).to_dict()
+        parser = ProdPageParser(
+            html=detail_page_html)
+        parser.show_in_cmd()
+        prod = parser.to_dict()
         print('[{}/{}] SUCCESS crawl {}: {}'\
               .format(prod_id-self.start,self.gap,prod_id,prod_url))
         prod['darenNoteUrl'] = prod_url
@@ -73,10 +76,11 @@ class DarenStaticDataGenerator:
         prod = self.get_prod_info(prod_id)
         if prod==404:
             return False
-        if len(prod.keys())==2:
+        if 'bad_result' in prod.keys():
             #访问正常，但无效数据
             return True
         prod['darenNoteId'] = prod_id
+        prod['createTime'] = get_beijing_time()
         if not self.write_json(prod):
             return False
         for key in prod.keys():
@@ -99,22 +103,11 @@ class DarenStaticDataGenerator:
                 self.root_dir,sql_name),'ab') as f:
             f.write('{};'.format(sql).encode('utf-8'))
         if self.mysql:
-            #self.save_to_mysql(sql)
             self.save_to_mysql_by_django_orm(prod)
         if int(prod['userId']) in self.white_users:
             return 'bmd add'
         else:
             return 'dav add'
-
-    def save_to_mysql_by_sql(self,sql):
-        #print(sql)
-        try:
-            self.cur.execute(sql)
-            print('save to mysql ok')
-        except pymysql.err.IntegrityError:
-            print('save to mysql : Duplicate')
-        except Exception as e:
-            print('error in save to mysql:{}'.format(str(e)))
 
     def save_to_mysql_by_django_orm(self,prod):
         db_info = t_daren_goodinfo()
@@ -129,14 +122,12 @@ class DarenStaticDataGenerator:
         db_info.goodUrl = prod['goodUrl']
         try:
             db_info.save()
-            print('save to mysql : Ok')
+            print('save to mysql: Ok')
         except Exception as e:
-            #print(str(e))
-            print('save to mysql : Duplicate')
+            print('save to mysql ERROR: {}'.format(str(e)))
 
     def write_json(self,prod):
         userId = int(prod['userId'])
-        prod['createTime'] = get_beijing_time()
         if userId in self.white_users:
             folder = 'CommonBaiMingDan'
         else:
@@ -181,16 +172,6 @@ class DarenStaticDataGenerator:
         self.mysql = mysql
         self.dynamic_range_length = dynamic_range_length
         self.mkdir_daren()
-        if mysql:
-            self.conn = pymysql.connect(
-                host = '123.57.213.217',
-                database = 'spiderpython',
-                user = 'root',
-                password = 'xingguang@123',
-                charset = 'utf8',
-                autocommit = True
-            )
-            self.cur = self.conn.cursor()
         pool = ThreadPool(thread_cot)
         cur = self.start
         err_cot = 0
@@ -225,16 +206,22 @@ class DarenStaticDataGenerator:
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
-                mail_address = '763038567@qq.com'
+                mail_address = '965606089@qq.com'
             )
             print('--------')
-        res_content = '本次抓取达人历史从 {} 到 {} , 总计{}个\n有白名单 {} 条，大v {} 条，共用时 {} 秒'.format(
-            self.start, self.end, self.end-self.start, bmd_success_cot, dav_success_cot, ex_tm.gap
+        res_content = (
+            '本次抓取达人历史从 {} 到 {} ,'
+            '总计{}个\n有白名单 {} 条，'
+            '大v {} 条，共用时 {} 秒'
+        ).format(
+            self.start, self.end, self.end-self.start,
+            bmd_success_cot, dav_success_cot, ex_tm.gap
         )
         self.send_mail(
-                subject='本次达人历史抓取数据完成[{}]'.format(get_beijing_time()),
+                subject='本次达人历史抓取数据完成[{}]'\
+                    .format(get_beijing_time()),
                 content = res_content,
-                mail_address = '763038567@qq.com'
+                mail_address = '965606089@qq.com'
             )
         pool.close()
         pool.join()

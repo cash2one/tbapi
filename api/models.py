@@ -22,8 +22,8 @@ class t_daren_goodinfo(models.Model):
     darenNoteTitle = models.CharField(max_length=500)
     darenNoteCover = models.CharField(max_length=500)
     darenNotePubDate = models.CharField(max_length=500)
-    darenNoteReason = models.CharField(max_length=500)
+    darenNoteReason = models.CharField(max_length=1000)
     goodId = models.CharField(max_length=500)
     goodUrl = models.CharField(max_length=500)
-    createTime = models.TimeField()
+    createTime = models.CharField(max_length=500)
 
