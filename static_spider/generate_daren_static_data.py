@@ -59,7 +59,12 @@ class DarenStaticDataGenerator:
     def get_prod_info(self,prod_id):
         prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
         #print(prod_url)
-        resp = request_with_ipad(prod_url,time_out=1000)
+        resp = request_with_ipad(prod_url,time_out=10)
+        try:
+            resp.status_code
+        except:
+            print('request timeout...')
+            return 404
         if resp.status_code==404:
             #print('Fail crawl {}:{}'.format(prod_id,prod_url))
             return 404
@@ -79,9 +84,11 @@ class DarenStaticDataGenerator:
         if 'bad_result' in prod.keys():
             #访问正常，但无效数据
             return True
+        '''
         for key in prod.keys():
             if prod[key] == None:
                 return True
+        '''
         prod['darenNoteId'] = prod_id
         prod['createTime'] = get_beijing_time()
         if not self.write_json(prod):
@@ -113,6 +120,7 @@ class DarenStaticDataGenerator:
             return 'dav add'
 
     def save_to_mysql_by_django_orm(self,prod):
+        print('open django orm...')
         db_info = t_daren_goodinfo()
         db_info.createTime = prod['createTime']
         db_info.darenId = prod['userId']
