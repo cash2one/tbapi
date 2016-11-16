@@ -56,12 +56,14 @@ class ProdPageParser:
     @property
     @ERN_METHOD
     def darenNotePubDate(self):
-        return self.soup.select_one('.pub-time').text.strip()[5:]
+        time_str =  self.soup.select_one('.pub-time').text.strip()
+        return time_str.strip('发表于  ')
 
     @property
     @ERN_METHOD
     def darenNoteReason(self):
-        return self.soup.select_one('.desc').text.strip()
+        return self.soup.find(
+            'p',attrs={'class':'desc'}).text.strip()
 
     @property
     @ERN_METHOD
@@ -83,18 +85,26 @@ class ProdPageParser:
     def to_dict(self):
         if self.goodUrl==None:
             return {
-                'result': None
+                'bad_result': None
             }
-        return {
-            "darenNoteCover": self.darenNoteCover,
-            "darenNotePubDate": self.darenNotePubDate,
-            "darenNoteReason": self.darenNoteReason,
-            "goodId": self.goodId,
-            #"goodNoteDetailStep": 3,
-            "goodUrl": self.goodUrl,
-            "userId": self.userId,
-            "darenNoteTitle":self.darenNoteTitle,
-        }
+        '''
+        if self.darenNoteReason=='':
+            print('--------- DeBug Info ----------')
+            self.show_in_cmd()
+        '''
+        try:
+            return {
+                "darenNoteCover": self.darenNoteCover,
+                "darenNotePubDate": self.darenNotePubDate,
+                "darenNoteReason": self.darenNoteReason,
+                "goodId": self.goodId,
+                "goodUrl": self.goodUrl,
+                "userId": self.userId,
+                "darenNoteTitle":self.darenNoteTitle,
+            }
+        except:
+            print('--------- Error Info ----------')
+            self.show_in_cmd()
 
     def show_in_cmd(self):
         # 测试打印

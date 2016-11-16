@@ -22,8 +22,6 @@ class Email:
             self,sender,receiver,subject,content,
             subtype='plain',img_src=None
     ):
-        if float(platform.python_version()[:3])>3.4:
-            raise ImportError('Email Class():Please use python version under 3.4')
         self.msg = MIMEMultipart('mixed')
         msgText = MIMEText(content,_subtype=subtype,_charset='utf-8')
         self.msg.attach(msgText)
@@ -38,7 +36,7 @@ class Email:
         self.msg['To'] = receiver
         self.sender = sender
         self.receiver = receiver
-        self.smtp = smtplib.SMTP('smtp.qq.com')
+        self.smtp = smtplib.SMTP('smtp.163.com')
 
     def conn_server(self,host,port):
         #连接服务器,并启动tls服务
