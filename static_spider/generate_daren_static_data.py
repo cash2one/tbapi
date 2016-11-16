@@ -58,14 +58,14 @@ class DarenStaticDataGenerator:
 
     def get_prod_info(self,prod_id):
         prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
-        resp = request_with_ipad(prod_url)
+        #print(prod_url)
+        resp = request_with_ipad(prod_url,time_out=1000)
         if resp.status_code==404:
             #print('Fail crawl {}:{}'.format(prod_id,prod_url))
             return 404
         detail_page_html = resp.text
         parser = ProdPageParser(
             html=detail_page_html)
-        parser.show_in_cmd()
         prod = parser.to_dict()
         print('[{}/{}] SUCCESS crawl {}: {}'\
               .format(prod_id-self.start,self.gap,prod_id,prod_url))
@@ -79,6 +79,9 @@ class DarenStaticDataGenerator:
         if 'bad_result' in prod.keys():
             #访问正常，但无效数据
             return True
+        for key in prod.keys():
+            if prod[key] == None:
+                return True
         prod['darenNoteId'] = prod_id
         prod['createTime'] = get_beijing_time()
         if not self.write_json(prod):
@@ -116,13 +119,14 @@ class DarenStaticDataGenerator:
         db_info.darenNoteId = prod['darenNoteId']
         db_info.darenNoteUrl = prod['darenNoteUrl']
         db_info.darenNoteTitle = prod['darenNoteTitle']
+        db_info.darenNoteReason = prod['darenNoteReason']
         db_info.darenNoteCover = prod['darenNoteCover']
         db_info.darenNotePubDate = prod['darenNotePubDate']
         db_info.goodId = prod['goodId']
         db_info.goodUrl = prod['goodUrl']
         try:
             db_info.save()
-            print('save to mysql: Ok')
+            print('save {} to mysql: OK'.format(db_info.goodId))
         except Exception as e:
             print('save to mysql ERROR: {}'.format(str(e)))
 
