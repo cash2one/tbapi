@@ -210,7 +210,7 @@ class DarenStaticDataGenerator:
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
-                mail_address = '965606089@qq.com'
+                mail_address = '763038567@qq.com'
             )
             print('--------')
         res_content = (
@@ -225,7 +225,7 @@ class DarenStaticDataGenerator:
                 subject='本次达人历史抓取数据完成[{}]'\
                     .format(get_beijing_time()),
                 content = res_content,
-                mail_address = '965606089@qq.com'
+                mail_address = '763038567@qq.com'
             )
         pool.close()
         pool.join()
