@@ -240,6 +240,8 @@ class DarenStaticDataGenerator:
                 #mail_address = '965606089@qq.com'
             )
             print('--------')
+        subject = '本次达人历史抓取数据完成[{}]'\
+                    .format(get_beijing_time())
         res_content = (
             '本次抓取达人历史从 {} 到 {} ,'
             '总计{}个\n有白名单 {} 条，'
@@ -249,13 +251,12 @@ class DarenStaticDataGenerator:
             bmd_success_cot, dav_success_cot, ex_tm.gap
         )
         self.send_mail(
-                subject='本次达人历史抓取数据完成[{}]'\
-                    .format(get_beijing_time()),
+                subject=subject,
                 content = res_content,
                 #mail_address='965606089@qq.com'
                 mail_address = '763038567@qq.com'
             )
-        print(res_content)
+        print(subject+'\n'+res_content)
         pool.close()
         pool.join()
 
