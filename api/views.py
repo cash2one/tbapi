@@ -98,7 +98,8 @@ def random_kick(request):
     rq_dict = {
         'mysql': False,
         'thread_cot': 32,
-        'dynamic_range_length': 1000
+        'dynamic_range_length': 1000,
+        'save_db_type': 0
     }
     for key in request.GET:
         rq_dict[key] = try_int(request.GET[key])
@@ -125,15 +126,4 @@ def random_kick(request):
         ret['message'] = 'run all range item ok'
     except Exception as e:
         ret['message'] = str(e)
-    '''
-    generator = DarenStaticDataGenerator(
-            start = rq_dict['start'],
-            end = rq_dict['end']
-        )
-    generator.run(
-        mysql=rq_dict['mysql'],thread_cot=rq_dict['thread_cot'],
-        dynamic_range_length = rq_dict['dynamic_range_length']
-    )
-    ret['status'] = 1
-    '''
     return ret

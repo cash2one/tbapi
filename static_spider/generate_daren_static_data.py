@@ -105,16 +105,29 @@ class DarenStaticDataGenerator:
                      prod['darenNotePubDate'],prod['darenNoteReason'],\
                      prod['goodId'],prod['goodUrl'],get_beijing_time()
                 )
-        if int(prod['userId']) in self.white_users:
+        WHITE_USER = int(prod['userId']) in self.white_users
+        if WHITE_USER:
             sql_name = 'baimingdan.sql'
         else:
             sql_name = 'dav.sql'
         with open('{}/{}'.format(
                 self.root_dir,sql_name),'ab') as f:
             f.write('{};'.format(sql).encode('utf-8'))
+        need_save = False
         if self.mysql:
+            if self.save_db_type==0:
+                need_save = True
+            elif self.save_db_type==1:
+                if WHITE_USER:
+                    need_save = True
+            elif self.save_db_type==2:
+                if not WHITE_USER:
+                    need_save = True
+            else:
+                raise KeyError('save_db_type just could be 0,1,2')
+        if need_save:
             self.save_to_mysql_by_django_orm(prod)
-        if int(prod['userId']) in self.white_users:
+        if WHITE_USER:
             return 'bmd add'
         else:
             return 'dav add'
@@ -182,9 +195,10 @@ class DarenStaticDataGenerator:
         emailAI.send()
         emailAI.close()
 
-    def run(self,mysql=True,thread_cot=32,dynamic_range_length=1000):
+    def run(self,mysql=True,thread_cot=32,dynamic_range_length=1000,save_db_type=0):
         self.mysql = mysql
         self.dynamic_range_length = dynamic_range_length
+        self.save_db_type = save_db_type
         self.mkdir_daren()
         pool = ThreadPool(thread_cot)
         cur = self.end
