@@ -214,6 +214,7 @@ class DarenStaticDataGenerator:
                 cur-dynamic_range_length,cur))
             little_range.reverse()
             res = pool.map(self.crawl_per_prod,little_range)
+            print('multi threads work out...')
             tm.end()
             ex_tm.end()
             dav_success = res.count('dav add')
