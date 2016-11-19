@@ -255,6 +255,7 @@ class DarenStaticDataGenerator:
                 #mail_address='965606089@qq.com'
                 mail_address = '763038567@qq.com'
             )
+        print(res_content)
         pool.close()
         pool.join()
 
