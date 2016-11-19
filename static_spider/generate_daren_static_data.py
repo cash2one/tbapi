@@ -230,7 +230,7 @@ class DarenStaticDataGenerator:
             ))
             content = ('达人历史从 {} 到 {} , '
                        '总计{}个\n有白名单 {} 条，'
-                       '大v {} 条，共用时 {} 秒'
+                       '大v {} 条，共用时 {} 秒 \n'
                        'save db type：{}'
                        ).format(
                 cur-dynamic_range_length,cur,dynamic_range_length,
