@@ -120,7 +120,8 @@ def random_kick(request):
         generator.run(
             mysql=rq_dict['mysql'],
             thread_cot=rq_dict['thread_cot'],
-            dynamic_range_length=rq_dict['dynamic_range_length']
+            dynamic_range_length=rq_dict['dynamic_range_length'],
+            save_db_type=rq_dict['save_db_type']
         )
         ret['status'] = 1
         ret['message'] = 'run all range item ok'
