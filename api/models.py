@@ -26,4 +26,4 @@ class t_daren_goodinfo(models.Model):
     goodId = models.CharField(max_length=500)
     goodUrl = models.CharField(max_length=500)
     createTime = models.CharField(max_length=500)
-
+    goodNoteDetailStep = models.IntegerField(max_length=4)

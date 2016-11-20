@@ -145,6 +145,7 @@ class DarenStaticDataGenerator:
         db_info.darenNotePubDate = prod['darenNotePubDate']
         db_info.goodId = prod['goodId']
         db_info.goodUrl = prod['goodUrl']
+        db_info.goodNoteDetailStep = 3
         try:
             db_info.save()
             print('save {} to mysql: OK'.format(db_info.darenNoteId))
