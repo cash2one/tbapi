@@ -18,7 +18,7 @@ for i in range(up_level_N):
     root_dir = os.path.normpath(os.path.join(root_dir, '..'))
     sys.path.append(root_dir)
 
-import json,time
+import json,time,random
 from api.func import Timer,get_beijing_time,request_with_ipad
 from api.models import t_daren_goodinfo
 from .Email import Email
@@ -196,8 +196,11 @@ class DarenStaticDataGenerator:
         emailAI.send()
         emailAI.close()
 
-    def run(self,mysql=True,thread_cot=32,dynamic_range_length=1000,save_db_type=0):
+    def run(self,mysql=True,thread_cot=32,
+            dynamic_range_length=1000,
+            visit_shuffle=False,save_db_type=0):
         self.mysql = mysql
+        self.shuffle = visit_shuffle
         self.dynamic_range_length = dynamic_range_length
         self.save_db_type = save_db_type
         self.mkdir_daren()
@@ -213,7 +216,10 @@ class DarenStaticDataGenerator:
             tm.start()
             little_range = list(range(
                 cur-dynamic_range_length,cur))
-            little_range.reverse()
+            if self.shuffle:
+                random.shuffle(little_range)
+            else:
+                little_range.reverse()
             res = pool.map(self.crawl_per_prod,little_range)
             print('multi threads work out...')
             tm.end()
