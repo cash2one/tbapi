@@ -66,7 +66,8 @@ class DarenStaticDataGenerator:
             print('request timeout...')
             return 404
         if resp.status_code==404:
-            #print('Fail crawl {}:{}'.format(prod_id,prod_url))
+            print('[{}/{}] Fail crawl {}:{}'.format(
+                prod_id-self.start,self.gap,prod_id,prod_url))
             return 404
         detail_page_html = resp.text
         parser = ProdPageParser(

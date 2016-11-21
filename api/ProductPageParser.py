@@ -29,6 +29,7 @@ class ProductPageParser:
         print(self.soup)
 
     @property
+    @ERN_METHOD
     def sections(self):
         #商品html div集合
         try:
@@ -37,10 +38,14 @@ class ProductPageParser:
             return []
 
     @property
+    @ERN_METHOD
     def page_num(self):
         #页数
         #return int(self.soup.select('.pagination > a')[-2].text)
-        return int(self.soup.select_one('.ui-page-s-len').text.split('/')[-1])
+        try:
+            return int(self.soup.select_one('.ui-page-s-len').text.split('/')[-1])
+        except:
+            return int(self.soup.select_one('.page-info').text.split('/')[-1])
 
 class Product:
     def __init__(self,sec):
