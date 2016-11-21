@@ -26,6 +26,7 @@ class ProductPageParser:
             self.soup = BeautifulSoup(html_source,'lxml')
         except:
             self.soup = BeautifulSoup(html_source,'html.parser')
+        print(self.soup)
 
     @property
     def sections(self):
@@ -38,8 +39,8 @@ class ProductPageParser:
     @property
     def page_num(self):
         #页数
-        return int(self.soup.select('.pagination > a')[-2].text)
-
+        #return int(self.soup.select('.pagination > a')[-2].text)
+        return int(self.soup.select_one('.ui-page-s-len').text.split('/')[-1])
 
 class Product:
     def __init__(self,sec):
@@ -136,7 +137,9 @@ class Product:
 
 
 if __name__=="__main__":
-    parser = ProductPageParser(from_web=False)
+    import requests
+    req = requests.get('https://snidel.tmall.com/search.htm?spm=a1z10.1-b-s.w5002-14496296580.1.hZbmaN&search=y')
+    parser = ProductPageParser(html_source=req.text)
     num = parser.page_num
     print(num)
     for sec in parser.sections:
