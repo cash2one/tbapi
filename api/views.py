@@ -91,47 +91,15 @@ def get_daren_prods(request):
 
 @json_response
 def random_kick(request):
-    ret = {'data': None, 'status': 0, 'message': None}
-    if request.method != 'GET':
-        ret['message'] = 'use GET method'
-        return ret
-    rq_dict = {
-        'mysql': False,
-        'thread_cot': 32,
-        'dynamic_range_length': 1000,
-        'save_db_type': 0,
-    }
-    for key in request.GET:
-        rq_dict[key] = try_int(request.GET[key])
-        #参数不全则用默认字典value
-    if 'mysql' in rq_dict.keys() and rq_dict['mysql']==0:
-        rq_dict['mysql'] = False
-    else:
-        rq_dict['mysql'] = True
-    if 'dynamic_range_length' in rq_dict.keys() and \
-            rq_dict['dynamic_range_length'] > 300000:
-        ret['message'] = 'dynamic_range_length need < 300000'
-        return ret
-    try:
-        generator = DarenStaticDataGenerator(
-            start = rq_dict['start'],
-            end = rq_dict['end']
-        )
-        generator.run(
-            mysql=rq_dict['mysql'],
-            thread_cot=rq_dict['thread_cot'],
-            dynamic_range_length=rq_dict['dynamic_range_length'],
-            save_db_type=rq_dict['save_db_type']
-        )
-        ret['status'] = 1
-        ret['message'] = 'run all range item ok'
-    except Exception as e:
-        ret['message'] = str(e)
-    return ret
+    return base_radom_kick(request,shuffle=False)
 
 
 @json_response
 def random_kick_plus(request):
+    return base_radom_kick(request,shuffle=True)
+
+
+def base_radom_kick(request,shuffle=False):
     ret = {'data': None, 'status': 0, 'message': None}
     if request.method != 'GET':
         ret['message'] = 'use GET method'
@@ -150,8 +118,8 @@ def random_kick_plus(request):
     else:
         rq_dict['mysql'] = True
     if 'dynamic_range_length' in rq_dict.keys() and \
-            rq_dict['dynamic_range_length'] > 300000:
-        ret['message'] = 'dynamic_range_length need < 300000'
+            rq_dict['dynamic_range_length'] > 10000000:
+        ret['message'] = 'dynamic_range_length need < 10000000'
         return ret
     try:
         generator = DarenStaticDataGenerator(
@@ -163,7 +131,7 @@ def random_kick_plus(request):
             thread_cot=rq_dict['thread_cot'],
             dynamic_range_length=rq_dict['dynamic_range_length'],
             save_db_type=rq_dict['save_db_type'],
-            visit_shuffle=True
+            visit_shuffle=shuffle
         )
         ret['status'] = 1
         ret['message'] = 'run all range item ok'
