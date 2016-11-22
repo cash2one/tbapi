@@ -215,7 +215,8 @@ class DarenStaticDataGenerator:
             dynamic_range_length=1000,
             err_print=False,
             visit_shuffle=False,
-            save_db_type=0
+            save_db_type=0,
+            debug=False
             ):
         self.err_print=err_print
         self.mysql = mysql
