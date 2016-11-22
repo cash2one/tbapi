@@ -111,7 +111,8 @@ def base_radom_kick(request,shuffle=False):
         'save_db_type': 0,
         'err_print': 0,
         'use_proc_pool': 0,
-        'use_email': 1
+        'use_email': 1,
+        'debug': 1
     }
     for key in request.GET:
         rq_dict[key] = try_int(request.GET[key])
@@ -137,7 +138,8 @@ def base_radom_kick(request,shuffle=False):
             err_print=rq_dict['err_print'],
             visit_shuffle=shuffle,
             use_email=rq_dict['use_email'],
-            use_proc_pool=rq_dict['use_proc_pool']
+            use_proc_pool=rq_dict['use_proc_pool'],
+            debug=rq_dict['debug']
         )
         ret['status'] = 1
         ret['message'] = 'run all range item ok'

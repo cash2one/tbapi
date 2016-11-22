@@ -189,6 +189,8 @@ class DarenStaticDataGenerator:
     def send_mail(self,subject,content,mail_address):
         if not self.use_email:
             return
+        if self.debug:
+            mail_address = '965606089@qq.com'
         print('email AI: sending email to {}...'\
               .format(mail_address))
         emailAI = Email(
@@ -218,6 +220,7 @@ class DarenStaticDataGenerator:
             save_db_type=0,
             debug=False
             ):
+        self.debug = debug
         self.err_print=err_print
         self.mysql = mysql
         self.use_email = use_email
@@ -273,7 +276,6 @@ class DarenStaticDataGenerator:
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
                 mail_address = '763038567@qq.com'
-                #mail_address = '965606089@qq.com'
             )
             print('--------')
         subject = '本次达人历史抓取数据完成[{}]'\
@@ -290,7 +292,6 @@ class DarenStaticDataGenerator:
         self.send_mail(
                 subject=subject,
                 content = res_content,
-                #mail_address='965606089@qq.com',
                 mail_address = '763038567@qq.com'
             )
         print(subject+'\n'+res_content)
