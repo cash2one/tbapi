@@ -112,7 +112,7 @@ def base_radom_kick(request,shuffle=False):
         'err_print': 0,
         'use_proc_pool': 0,
         'use_email': 1,
-        'debug': 1
+        'debug': 0
     }
     for key in request.GET:
         rq_dict[key] = try_int(request.GET[key])
