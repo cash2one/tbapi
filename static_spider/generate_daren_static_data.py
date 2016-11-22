@@ -179,7 +179,7 @@ class DarenStaticDataGenerator:
             jd = json.load(
                 fp=open(json_file_name, 'r')
             )
-        except json.decoder.JSONDecodeError:
+        except:
             return False
         jd['prods_list'].append(prod)
         with open(json_file_name, 'w') as f:
