@@ -31,6 +31,8 @@ class DarenStaticDataGenerator:
         self.start = start
         self.end = end
         self.gap = end - start
+        self.tot = 0
+        self.insert_cot = 0
         self.white_users = self.load_white_users()
         print('load white users: {}'.format(
             len(self.white_users)))
@@ -66,22 +68,25 @@ class DarenStaticDataGenerator:
             print('request timeout...')
             return 404
         if resp.status_code==404:
-            print('[{}/{}] Fail crawl {}:{}'.format(
-                prod_id-self.start,self.gap,prod_id,prod_url))
+            if self.err_print:
+                print('{}\t{}\t\t{}\t Fail\t\t{}\t{}'.format(
+                    self.tot,self.gap,self.insert_cot,prod_id,prod_url))
             return 404
         detail_page_html = resp.text
         parser = ProdPageParser(
             html=detail_page_html)
         prod = parser.to_dict()
-        print('[{}/{}] SUCCESS crawl {}: {}'\
-              .format(prod_id-self.start,self.gap,prod_id,prod_url))
+        status = '{}\t{}\t\t{}\t SUCCESS\t{}'\
+              .format(self.tot,self.gap,self.insert_cot,prod_id)
         prod['darenNoteUrl'] = prod_url
-        return prod
+        return prod,status
 
     def crawl_per_prod(self,prod_id):
-        prod = self.get_prod_info(prod_id)
-        if prod==404:
+        self.tot += 1
+        info = self.get_prod_info(prod_id)
+        if info==404:
             return False
+        prod, status = info
         if 'bad_result' in prod.keys():
             #访问正常，但无效数据
             return True
@@ -127,14 +132,14 @@ class DarenStaticDataGenerator:
             else:
                 raise KeyError('save_db_type just could be 0,1,2')
         if need_save:
-            self.save_to_mysql_by_django_orm(prod)
+            self.save_to_mysql_by_django_orm(prod,status)
         if WHITE_USER:
             return 'bmd add'
         else:
             return 'dav add'
 
-    def save_to_mysql_by_django_orm(self,prod):
-        print('open django orm...')
+    def save_to_mysql_by_django_orm(self,prod,status):
+        #print('open django orm...')
         db_info = t_daren_goodinfo()
         db_info.createTime = prod['createTime']
         db_info.darenId = prod['userId']
@@ -149,9 +154,12 @@ class DarenStaticDataGenerator:
         db_info.goodNoteDetailStep = 3
         try:
             db_info.save()
-            print('save {} to mysql: OK'.format(db_info.darenNoteId))
+            self.insert_cot += 1
+            print('{}\tSave {} to mysql: OK'\
+                  .format(status,db_info.darenNoteId))
         except Exception as e:
-            print('save to mysql ERROR: {}'.format(str(e)))
+            print('{}\tSave to mysql ERROR: {}'\
+                  .format(status,str(e)))
 
     def write_json(self,prod):
         userId = int(prod['userId'])
@@ -199,7 +207,10 @@ class DarenStaticDataGenerator:
 
     def run(self,mysql=True,thread_cot=32,
             dynamic_range_length=1000,
-            visit_shuffle=False,save_db_type=0):
+            visit_shuffle=False,save_db_type=0,
+            err_print=False
+            ):
+        self.err_print=err_print
         self.mysql = mysql
         self.shuffle = visit_shuffle
         self.dynamic_range_length = dynamic_range_length
@@ -266,7 +277,7 @@ class DarenStaticDataGenerator:
         self.send_mail(
                 subject=subject,
                 content = res_content,
-                #mail_address='965606089@qq.com'
+                #mail_address='965606089@qq.com',
                 mail_address = '763038567@qq.com'
             )
         print(subject+'\n'+res_content)

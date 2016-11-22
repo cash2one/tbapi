@@ -109,6 +109,7 @@ def base_radom_kick(request,shuffle=False):
         'thread_cot': 32,
         'dynamic_range_length': 1000,
         'save_db_type': 0,
+        'err_print': 0,
     }
     for key in request.GET:
         rq_dict[key] = try_int(request.GET[key])
@@ -118,8 +119,8 @@ def base_radom_kick(request,shuffle=False):
     else:
         rq_dict['mysql'] = True
     if 'dynamic_range_length' in rq_dict.keys() and \
-            rq_dict['dynamic_range_length'] > 10000000:
-        ret['message'] = 'dynamic_range_length need < 10000000'
+            rq_dict['dynamic_range_length'] > 100000000:
+        ret['message'] = 'dynamic_range_length need < 100000000'
         return ret
     try:
         generator = DarenStaticDataGenerator(
@@ -131,6 +132,7 @@ def base_radom_kick(request,shuffle=False):
             thread_cot=rq_dict['thread_cot'],
             dynamic_range_length=rq_dict['dynamic_range_length'],
             save_db_type=rq_dict['save_db_type'],
+            err_print=rq_dict['err_print'],
             visit_shuffle=shuffle
         )
         ret['status'] = 1
