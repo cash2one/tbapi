@@ -280,7 +280,7 @@ class DarenStaticDataGenerator:
         res_content = (
             '本次抓取达人历史从 {} 到 {} ,'
             '总计{}个\n有白名单 {} 条，'
-            '大v {} 条，\n数据库存入 {} 条,共用时 {} 秒'
+            '大v {} 条，数据库存入 {} 条,共用时 {} 秒'
         ).format(
             self.start, self.end, self.end-self.start,
             bmd_success_cot, dav_success_cot,
