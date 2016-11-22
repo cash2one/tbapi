@@ -36,7 +36,7 @@ class DarenGoodInfo(Base):
 
 
 mysql_url = (
-    'mysql://{}:{}@{}:{}/{}'
+    'mysql://{}:{}@{}:{}/{}?charset=utf8'
 ).format(
     'root','xingguang@123',
     '123.57.213.217',3306,'spiderpython',
@@ -49,6 +49,7 @@ from sqlalchemy.orm import sessionmaker
 Session = sessionmaker()
 Session.configure(
     bind = create_engine(
-        name_or_url=mysql_url,echo=True
+        name_or_url=mysql_url,
+        #echo=True
     )
 )

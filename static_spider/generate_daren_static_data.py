@@ -164,9 +164,14 @@ class DarenStaticDataGenerator:
             return 'dav add'
 
     def save_to_mysql_by_sql_alchemy(self,prod,status):
-        print('open sqlalchrmy session...')
-        db_session = Session()
+        #print('open sqlalchrmy session...')
         try:
+            '''
+            for key in prod.keys():
+                if isinstance(prod[key],str):
+                    prod[key] = prod[key].encode('utf8')
+            '''
+            db_session = Session()
             db_session.add(
                 DarenGoodInfo(
                     createTime=prod['createTime'],
@@ -327,11 +332,13 @@ class DarenStaticDataGenerator:
             )
             #print(content)
             cur -= dynamic_range_length
+            '''
             self.send_mail(
                 subject='达人历史抓取数据[{}]'.format(get_beijing_time()),
                 content = content,
                 mail_address = '763038567@qq.com'
             )
+            '''
             print('--------')
         subject = '本次达人历史抓取数据完成[{}]'\
                     .format(get_beijing_time())
@@ -349,9 +356,10 @@ class DarenStaticDataGenerator:
                 content = res_content,
                 mail_address = '763038567@qq.com'
             )
-        print(subject+'\n'+res_content)
+        #print(subject+'\n'+res_content)
         pool.close()
         pool.join()
+        return self.insert_cot
 
 if __name__=="__main__":
     generator = DarenStaticDataGenerator(5732587480,57325881000)

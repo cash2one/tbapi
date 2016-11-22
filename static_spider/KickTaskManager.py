@@ -37,18 +37,19 @@ def get_unfinished_range():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
-        'select `left`,`right` from task_flag where is_crawled=0'
+        'select `left`,`right`,`id` from task_flag where is_crawled=0'
     )
     data = cur.fetchall()
     return data
 
-def mark_ok(left):
+def mark_ok(id,success_cot):
     conn = get_conn()
     cur = conn.cursor()
-    sql = 'update task_flag set `is_crawled`=1 WHERE `left`={}'.format(left)
+    sql = 'update task_flag set `is_crawled`=1 , `success_cot`={} \
+                WHERE `id`={}'.format(success_cot,id)
     print(sql)
     cur.execute(sql)
-    print('update {} ok'.format(left))
+    print('update {} ok'.format(id))
     conn.commit()
     cur.close()
     conn.close()
@@ -60,24 +61,37 @@ def run():
         print(range)
         left = range[0]
         right = range[1]
-        spider = DarenStaticDataGenerator(left,right)
+        id = range[2]
+        #mark_ok(id,2)
         try:
-            spider.run(
+            spider = DarenStaticDataGenerator(left,right)
+            success_cot = spider.run(
                 mysql=True,
-                thread_cot=1,
+                thread_cot=64,
                 use_proc_pool=False,
-                use_email=False,
+                use_email=True,
                 dynamic_range_length=right-left,
-                err_print=False,
+                err_print=True,
                 visit_shuffle=False,
                 save_db_type=0,
-                debug=False,
+                debug=True,
                 save_by_django=False
             )
-            mark_ok(left)
+
+            #print(success_cot)
+            #time.sleep(3)
+            mark_ok(id,success_cot)
+            #time.sleep(3)
+
         except Exception as e:
             print(str(e))
-
+       
 
 if __name__=="__main__":
-     run()
+     import time
+     while(1):
+        try:
+            run()
+        except:
+            pass
+            time.sleep(1)
