@@ -110,6 +110,8 @@ def base_radom_kick(request,shuffle=False):
         'dynamic_range_length': 1000,
         'save_db_type': 0,
         'err_print': 0,
+        'use_proc_pool': 1,
+        'use_email': 1
     }
     for key in request.GET:
         rq_dict[key] = try_int(request.GET[key])
@@ -133,7 +135,9 @@ def base_radom_kick(request,shuffle=False):
             dynamic_range_length=rq_dict['dynamic_range_length'],
             save_db_type=rq_dict['save_db_type'],
             err_print=rq_dict['err_print'],
-            visit_shuffle=shuffle
+            visit_shuffle=shuffle,
+            use_email=rq_dict['use_email'],
+            use_proc_pool=rq_dict['use_proc_pool']
         )
         ret['status'] = 1
         ret['message'] = 'run all range item ok'

@@ -24,6 +24,7 @@ from api.models import t_daren_goodinfo
 from .Email import Email
 from .ProdPageParser import ProdPageParser
 from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing import Pool as ProcPool
 
 
 class DarenStaticDataGenerator:
@@ -186,6 +187,8 @@ class DarenStaticDataGenerator:
         return True
 
     def send_mail(self,subject,content,mail_address):
+        if not self.use_email:
+            return
         print('email AI: sending email to {}...'\
               .format(mail_address))
         emailAI = Email(
@@ -205,18 +208,26 @@ class DarenStaticDataGenerator:
         emailAI.send()
         emailAI.close()
 
-    def run(self,mysql=True,thread_cot=32,
+    def run(self,mysql=True,
+            thread_cot=32,
+            use_proc_pool=True,
+            use_email=True,
             dynamic_range_length=1000,
-            visit_shuffle=False,save_db_type=0,
-            err_print=False
+            err_print=False,
+            visit_shuffle=False,
+            save_db_type=0
             ):
         self.err_print=err_print
         self.mysql = mysql
+        self.use_email = use_email
         self.shuffle = visit_shuffle
         self.dynamic_range_length = dynamic_range_length
         self.save_db_type = save_db_type
         self.mkdir_daren()
-        pool = ThreadPool(thread_cot)
+        if use_proc_pool:
+            pool = ProcPool()
+        else:
+            pool = ThreadPool(thread_cot)
         cur = self.end
         err_cot = 0
         dav_success_cot = 0
