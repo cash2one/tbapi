@@ -34,6 +34,7 @@ class DarenStaticDataGenerator:
         self.gap = end - start
         self.tot = 0
         self.insert_cot = 0
+        self.mark = 0
         self.white_users = self.load_white_users()
         print('load white users: {}'.format(
             len(self.white_users)))
@@ -70,15 +71,17 @@ class DarenStaticDataGenerator:
             return 404
         if resp.status_code==404:
             if self.err_print:
-                print('{}\t{}\t\t{}\t Fail\t\t{}\t{}'.format(
+                print('{}\t{}\t{}\t{}\t\t{}\t Fail\t\t{}\t{}'.format(
+                    self.tot-self.mark,self.dynamic_range_length,
                     self.tot,self.gap,self.insert_cot,prod_id,prod_url))
             return 404
         detail_page_html = resp.text
         parser = ProdPageParser(
             html=detail_page_html)
         prod = parser.to_dict()
-        status = '{}\t{}\t\t{}\t SUCCESS\t{}'\
-              .format(self.tot,self.gap,self.insert_cot,prod_id)
+        status = '{}\t{}\t{}\t{}\t\t{}\t SUCCESS\t{}'\
+              .format(self.tot-self.mark,self.dynamic_range_length,
+                      self.tot,self.gap,self.insert_cot,prod_id)
         prod['darenNoteUrl'] = prod_url
         return prod,status
 
@@ -249,6 +252,7 @@ class DarenStaticDataGenerator:
                 little_range.reverse()
             res = pool.map(self.crawl_per_prod,little_range)
             print('multi threads work out...')
+            self.mark = self.tot
             tm.end()
             ex_tm.end()
             dav_success = res.count('dav add')
