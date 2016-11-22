@@ -113,12 +113,15 @@ class DarenStaticDataGenerator:
         '''
         prod['darenNoteId'] = prod_id
         prod['createTime'] = get_beijing_time()
+        '''
         if not self.write_json(prod):
             return False
+        '''
         for key in prod.keys():
             #print(key,prod[key])
             if isinstance(prod[key],str) and "'" in prod[key]:
                 prod[key] = prod[key].replace("'",'')
+        '''
         sql = "insert into t_daren_goodinfo(darenId,darenNoteId,darenNoteUrl,darenNoteTitle,darenNoteCover,darenNotePubDate,darenNoteReason,goodId,goodUrl,createTime) \
                 VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')"\
                 .format(
@@ -127,7 +130,9 @@ class DarenStaticDataGenerator:
                      prod['darenNotePubDate'],prod['darenNoteReason'],\
                      prod['goodId'],prod['goodUrl'],get_beijing_time()
                 )
+        '''
         WHITE_USER = int(prod['userId']) in self.white_users
+        '''
         if WHITE_USER:
             sql_name = 'baimingdan.sql'
         else:
@@ -135,6 +140,7 @@ class DarenStaticDataGenerator:
         with open('{}/{}'.format(
                 self.root_dir,sql_name),'ab') as f:
             f.write('{};'.format(sql).encode('utf-8'))
+        '''
         need_save = False
         if self.mysql:
             if self.save_db_type==0:
@@ -158,6 +164,7 @@ class DarenStaticDataGenerator:
             return 'dav add'
 
     def save_to_mysql_by_sql_alchemy(self,prod,status):
+        print('open sqlalchrmy session...')
         db_session = Session()
         try:
             db_session.add(
@@ -274,7 +281,7 @@ class DarenStaticDataGenerator:
         self.shuffle = visit_shuffle
         self.dynamic_range_length = dynamic_range_length
         self.save_db_type = save_db_type
-        self.mkdir_daren()
+        #self.mkdir_daren()
         if use_proc_pool:
             pool = ProcPool()
         else:

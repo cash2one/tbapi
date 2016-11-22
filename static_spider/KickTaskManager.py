@@ -64,7 +64,7 @@ def run():
         try:
             spider.run(
                 mysql=True,
-                thread_cot=32,
+                thread_cot=1,
                 use_proc_pool=False,
                 use_email=False,
                 dynamic_range_length=right-left,
@@ -74,10 +74,10 @@ def run():
                 debug=False,
                 save_by_django=False
             )
+            mark_ok(left)
         except Exception as e:
             print(str(e))
 
 
 if __name__=="__main__":
-    mark_ok(1)
-    # run()
+     run()
