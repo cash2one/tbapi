@@ -110,7 +110,7 @@ def base_radom_kick(request,shuffle=False):
         'dynamic_range_length': 1000,
         'save_db_type': 0,
         'err_print': 0,
-        'use_proc_pool': 1,
+        'use_proc_pool': 0,
         'use_email': 1
     }
     for key in request.GET:
