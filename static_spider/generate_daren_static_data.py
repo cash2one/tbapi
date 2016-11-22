@@ -11,7 +11,7 @@
 """
 
 import sys,os
-up_level_N = 2
+up_level_N = 1
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 root_dir = SCRIPT_DIR
 for i in range(up_level_N):
@@ -20,11 +20,23 @@ for i in range(up_level_N):
 
 import json,time,random
 from api.func import Timer,get_beijing_time,request_with_ipad
-from api.models import t_daren_goodinfo
-from .Email import Email
-from .ProdPageParser import ProdPageParser
+
+try:
+    from .Email import Email
+    from .ProdPageParser import ProdPageParser
+    from .ORM import Session,DarenGoodInfo
+except:
+    from Email import Email
+    from ProdPageParser import ProdPageParser
+    from ORM import Session,DarenGoodInfo
+
 from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import Pool as ProcPool
+
+try:
+    from api.models import t_daren_goodinfo
+except:
+    pass
 
 
 class DarenStaticDataGenerator:
@@ -136,11 +148,41 @@ class DarenStaticDataGenerator:
             else:
                 raise KeyError('save_db_type just could be 0,1,2')
         if need_save:
-            self.save_to_mysql_by_django_orm(prod,status)
+            if self.save_by_djagno:
+                self.save_to_mysql_by_django_orm(prod,status)
+            else:
+                self.save_to_mysql_by_sql_alchemy(prod,status)
         if WHITE_USER:
             return 'bmd add'
         else:
             return 'dav add'
+
+    def save_to_mysql_by_sql_alchemy(self,prod,status):
+        db_session = Session()
+        try:
+            db_session.add(
+                DarenGoodInfo(
+                    createTime=prod['createTime'],
+                    darenId = prod['userId'],
+                    darenNoteId = prod['darenNoteId'],
+                    darenNoteUrl = prod['darenNoteUrl'],
+                    darenNoteTitle = prod['darenNoteTitle'],
+                    darenNoteReason = prod['darenNoteReason'],
+                    darenNoteCover = prod['darenNoteCover'],
+                    darenNotePubDate = prod['darenNotePubDate'],
+                    goodId = prod['goodId'],
+                    goodUrl = prod['goodUrl'],
+                    goodNoteDetailStep = 3
+                )
+            )
+            db_session.commit()
+            self.insert_cot += 1
+            print('{}\tSave {} to mysql: OK'\
+                  .format(status,prod['darenNoteId']))
+        except Exception as e:
+            print('{}\tSave to mysql ERROR: {}'\
+                  .format(status,str(e)))
+        db_session.close()
 
     def save_to_mysql_by_django_orm(self,prod,status):
         #print('open django orm...')
@@ -221,8 +263,10 @@ class DarenStaticDataGenerator:
             err_print=False,
             visit_shuffle=False,
             save_db_type=0,
-            debug=False
+            debug=False,
+            save_by_django=True
             ):
+        self.save_by_djagno = save_by_django
         self.debug = debug
         self.err_print=err_print
         self.mysql = mysql
