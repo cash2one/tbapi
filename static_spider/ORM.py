@@ -33,14 +33,22 @@ class DarenGoodInfo(Base):
     goodNoteDetailStep = Column(Integer)
 
 
+aliyun = False
 
-
-mysql_url = (
-    'mysql://{}:{}@{}:{}/{}?charset=utf8'
-).format(
-    'root','xingguang@123',
-    '123.57.213.217',3306,'spiderpython',
-)
+if aliyun:
+    mysql_url = (
+        'mysql://{}:{}@{}:{}/{}?charset=utf8'
+    ).format(
+        'root','xingguang@123',
+        '123.57.213.217',3306,'spiderpython',
+    )
+else:
+    mysql_url = (
+        'mysql://{}:{}@{}:{}/{}?charset=utf8'
+    ).format(
+        'lyn','tonylu716',
+        '10.8.3.97',3306,'spider_python',
+    )
 
 print(mysql_url)
 

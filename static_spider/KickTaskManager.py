@@ -87,11 +87,25 @@ def run():
             print(str(e))
        
 
+def per_proc_run(proc_id):
+    try:
+        run()
+    except Exception as e:
+        print(str(e))
+
 if __name__=="__main__":
-     import time
-     while(1):
-        try:
-            run()
-        except:
-            pass
-            time.sleep(1)
+    from multiprocessing import Pool as ProcPool
+
+    use_proc = False
+
+    if use_proc:
+        proc_pool = ProcPool(2)
+
+    import time
+    while(1):
+        if use_proc:
+            proc_pool.map(per_proc_run,range(4))
+            proc_pool.close()
+            proc_pool.join()
+        per_proc_run(1)
+        time.sleep(1)
