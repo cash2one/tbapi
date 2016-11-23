@@ -19,7 +19,7 @@ sys.path.append(
 
 from generate_daren_static_data import DarenStaticDataGenerator
 
-import random,time
+import random,time,gc
 import pymysql
 def get_conn():
     conn = pymysql.connect(
@@ -64,8 +64,8 @@ def run():
         id = range[2]
         #mark_ok(id,2)
         try:
-            spider = DarenStaticDataGenerator(left,right)
-            success_cot = spider.run(
+            success_cot = DarenStaticDataGenerator(
+                    left,right).run(
                 mysql=True,
                 thread_cot=64,
                 use_proc_pool=False,
@@ -77,12 +77,7 @@ def run():
                 debug=True,
                 save_by_django=False
             )
-
-            #print(success_cot)
-            #time.sleep(3)
             mark_ok(id,success_cot)
-            #time.sleep(3)
-
         except Exception as e:
             print(str(e))
        
@@ -90,6 +85,7 @@ def run():
 def per_proc_run(proc_id):
     try:
         run()
+        gc.collect()
     except Exception as e:
         print(str(e))
 
