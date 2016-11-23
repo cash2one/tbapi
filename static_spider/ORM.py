@@ -33,7 +33,7 @@ class DarenGoodInfo(Base):
     goodNoteDetailStep = Column(Integer)
 
 
-aliyun = False
+aliyun = True
 
 if aliyun:
     mysql_url = (
