@@ -17,7 +17,7 @@ sys.path.append(
     )
 )
 
-from generate_daren_static_data import DarenStaticDataGenerator
+#from generate_daren_static_data import DarenStaticDataGenerator
 
 import random,time,gc
 import pymysql
@@ -59,8 +59,7 @@ def get_spefic_range(leftest,rightest):
     cur = conn.cursor()
     sql = 'select `left`,`right`,`id` \
         from task_flag where is_crawled=0 \
-        and id>{} and id<{} limit 100'.format(
-        get_max_grade(),
+        and `left`>{} and `right`<{} limit 100'.format(
         leftest,rightest
     )
     print(sql)
@@ -115,5 +114,6 @@ def run(big_loop=True,leftest=None,rightest=None):
                 gc.collect()
         except:
             pass
+
 
 
