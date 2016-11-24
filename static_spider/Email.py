@@ -20,7 +20,7 @@ import platform
 class Email:
     def __init__(
             self,sender,receiver,subject,content,
-            subtype='plain',img_src=None
+            subtype='plain',img_src=None,host='smtp.qq.com'
     ):
         self.msg = MIMEMultipart('mixed')
         msgText = MIMEText(content,_subtype=subtype,_charset='utf-8')
@@ -36,7 +36,7 @@ class Email:
         self.msg['To'] = receiver
         self.sender = sender
         self.receiver = receiver
-        self.smtp = smtplib.SMTP('smtp.163.com')
+        self.smtp = smtplib.SMTP(host)
 
     def conn_server(self,host,port):
         #连接服务器,并启动tls服务

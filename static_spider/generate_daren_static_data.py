@@ -47,6 +47,7 @@ class DarenStaticDataGenerator:
         self.tot = 0
         self.insert_cot = 0
         self.mark = 0
+        self.use_email = True
         self.white_users = self.load_white_users()
         print('load white users: {}'.format(
             len(self.white_users)))
@@ -168,11 +169,6 @@ class DarenStaticDataGenerator:
     def save_to_mysql_by_sql_alchemy(self,prod,status):
         #print('open sqlalchrmy session...')
         try:
-            '''
-            for key in prod.keys():
-                if isinstance(prod[key],str):
-                    prod[key] = prod[key].encode('utf8')
-            '''
             db_session = Session()
             db_session.add(
                 DarenGoodInfo(
@@ -255,20 +251,21 @@ class DarenStaticDataGenerator:
               .format(mail_address))
         emailAI = Email(
             receiver = mail_address,
-            sender = 'wxg19891225@163.com',
+            sender = 'luyangaini@vip.qq.com',
             subject = subject,
             content = content
               )
         emailAI.conn_server(
-            host='smtp.163.com',
-            port = 25
+            host='smtp.qq.com',
+            port = 587
         )
         emailAI.login(
-            username='wxg19891225@163.com',
-            password='JACKY163'
+            username='luyangaini@vip.qq.com',
+            password='ptuevbbulatcbcfh'
         )
         emailAI.send()
         emailAI.close()
+
 
     def run(self,mysql=True,
             thread_cot=32,
@@ -290,6 +287,7 @@ class DarenStaticDataGenerator:
         self.dynamic_range_length = dynamic_range_length
         self.save_db_type = save_db_type
         #self.mkdir_daren()
+        self.send_mail('123','123','965606089@qq.com')
         if use_proc_pool:
             pool = ProcPool()
         else:
@@ -366,6 +364,5 @@ class DarenStaticDataGenerator:
 
 if __name__=="__main__":
     generator = DarenStaticDataGenerator(5732587480,57325881000)
-    #generator.crawl_per_prod('5732587480')
     generator.run(mysql=False,thread_cot=32,dynamic_range_length=1000)
     #generator.load_white_users()
