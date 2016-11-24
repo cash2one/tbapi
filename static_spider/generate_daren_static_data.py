@@ -287,7 +287,6 @@ class DarenStaticDataGenerator:
         self.dynamic_range_length = dynamic_range_length
         self.save_db_type = save_db_type
         #self.mkdir_daren()
-        self.send_mail('123','123','965606089@qq.com')
         if use_proc_pool:
             pool = ProcPool()
         else:
