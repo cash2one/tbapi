@@ -44,11 +44,11 @@ def get_max_grade():
 def get_unfinished_range():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute(
-        'select `left`,`right`,`id` \
+    sql = 'select `left`,`right`,`id` \
         from task_flag where is_crawled=0 \
         and grade = {}'.format(get_max_grade())
-    )
+    print(sql)
+    cur.execute(sql)
     data = cur.fetchall()
     cur.close()
     conn.close()
