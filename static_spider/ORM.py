@@ -58,8 +58,9 @@ Session = sessionmaker()
 Session.configure(
     bind = create_engine(
         name_or_url=mysql_url,
-        pool_size=25,
-        pool_timeout=20
+        pool_size=50,
+        pool_timeout=20,
+        pool_recycle=1800
         #echo=True
     )
 )
