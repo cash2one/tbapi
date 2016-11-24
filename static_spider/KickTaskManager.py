@@ -104,7 +104,7 @@ def run(big_loop=True,leftest=None,rightest=None):
                     err_print=True,
                     visit_shuffle=False,
                     save_db_type=0,
-                    debug=True,
+                    debug=False,
                     save_by_django=False
                 )
                 mark_ok(id,success_cot)
