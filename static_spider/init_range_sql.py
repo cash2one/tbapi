@@ -12,15 +12,19 @@
 import pymysql
 
 def get_conn():
-    conn = pymysql.connect(
-        db = 'spiderpython',
-        user = 'root',
-        password = 'xingguang@123',
-        host = '123.57.213.217',
-        port = 3306
-    )
-    conn.autocommit=True
-    return conn
+    while(1):
+        try:
+            conn = pymysql.connect(
+                db = 'spiderpython',
+                user = 'root',
+                password = 'xingguang@123',
+                host = '123.57.213.217',
+                port = 3306
+            )
+            conn.autocommit=True
+            return conn
+        except:
+            pass
 
 def mark_flag(left):
     conn = get_conn()
@@ -42,9 +46,9 @@ def mark_flag(left):
 
 
 
-start = 5400000000
+start = 5600000000
 
-end = 5500000000
+end =   5700000000
 
 gap = 100000
 
@@ -59,6 +63,6 @@ for j in lefts:
 from multiprocessing.dummy import Pool as ThreadPool
 
 
-pool = ThreadPool(16)
+pool = ThreadPool(32)
 
 pool.map(mark_flag,range(start,end,gap))

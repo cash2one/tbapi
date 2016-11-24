@@ -17,7 +17,7 @@ sys.path.append(
     )
 )
 
-from generate_daren_static_data import DarenStaticDataGenerator
+#from generate_daren_static_data import DarenStaticDataGenerator
 
 import random,time,gc
 import pymysql
@@ -32,14 +32,26 @@ def get_conn():
     conn.autocommit=True
     return conn
 
+def get_max_grade():
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        'select max(grade) from task_flag'
+    )
+    data = cur.fetchall()[0][0]
+    return data
 
 def get_unfinished_range():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
-        'select `left`,`right`,`id` from task_flag where is_crawled=0'
+        'select `left`,`right`,`id` \
+        from task_flag where is_crawled=0 \
+        and grade = {}'.format(get_max_grade())
     )
     data = cur.fetchall()
+    cur.close()
+    conn.close()
     return data
 
 def mark_ok(id,success_cot):
@@ -90,6 +102,7 @@ def per_proc_run(proc_id):
         print(str(e))
 
 if __name__=="__main__":
+
     from multiprocessing import Pool as ProcPool
 
     use_proc = False
