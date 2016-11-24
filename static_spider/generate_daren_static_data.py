@@ -322,6 +322,7 @@ class DarenStaticDataGenerator:
                 int((dav_success_cot+bmd_success_cot/err_cot)*100),
                 tm.gap, ex_tm.gap
             ))
+            '''
             content = ('达人历史从 {} 到 {} , '
                        '总计{}个\n有白名单 {} 条，'
                        '大v {} 条，共用时 {} 秒 \n'
@@ -331,6 +332,7 @@ class DarenStaticDataGenerator:
                 bmd_success,dav_success,tm.gap,self.save_db_type
             )
             #print(content)
+            '''
             cur -= dynamic_range_length
             '''
             self.send_mail(
