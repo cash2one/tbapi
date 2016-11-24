@@ -97,7 +97,7 @@ def run(big_loop=True,leftest=None,rightest=None):
                 success_cot = DarenStaticDataGenerator(
                         left,right).run(
                     mysql=True,
-                    thread_cot=64,
+                    thread_cot=32,
                     use_proc_pool=False,
                     use_email=True,
                     dynamic_range_length=right-left,
