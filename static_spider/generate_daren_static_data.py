@@ -351,10 +351,11 @@ class DarenStaticDataGenerator:
             bmd_success_cot, dav_success_cot,
             self.insert_cot, ex_tm.gap
         )
-        self.send_mail(
+        for mail_address in ['763038567@qq.com','965606089@qq.com']:
+            self.send_mail(
                 subject=subject,
                 content = res_content,
-                mail_address = '763038567@qq.com'
+                mail_address = mail_address
             )
         #print(subject+'\n'+res_content)
         pool.close()
