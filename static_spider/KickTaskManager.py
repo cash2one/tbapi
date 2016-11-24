@@ -36,7 +36,7 @@ def get_max_grade():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
-        'select max(grade) from task_flag'
+        'select max(grade) from task_flag WHERE is_crawled=0'
     )
     data = cur.fetchall()[0][0]
     return data
