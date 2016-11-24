@@ -17,7 +17,7 @@ sys.path.append(
     )
 )
 
-#from generate_daren_static_data import DarenStaticDataGenerator
+from generate_daren_static_data import DarenStaticDataGenerator
 
 import random,time,gc
 import pymysql
