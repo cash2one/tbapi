@@ -21,6 +21,7 @@ from generate_daren_static_data import DarenStaticDataGenerator
 
 import random,time,gc
 import pymysql
+
 def get_conn():
     conn = pymysql.connect(
         db = 'spiderpython',
@@ -92,6 +93,7 @@ def load_white_users():
     return []
 
 def run(big_loop=True,leftest=None,rightest=None):
+    gc.enable()
     while(1):
         try:
             if big_loop:
@@ -121,7 +123,7 @@ def run(big_loop=True,leftest=None,rightest=None):
             except Exception as e:
                 print(str(e))
             finally:
-                gc.collect()
+                gc.collect(generation=2)
         except:
             time.sleep(2)
 
