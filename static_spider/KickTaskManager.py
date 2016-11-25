@@ -103,23 +103,26 @@ def run(big_loop=True,leftest=None,rightest=None):
             print(range)
             #mark_ok(id,2)
             try:
-                success_cot = DarenStaticDataGenerator(
-                    start=range[0],
-                    end=range[1],
-                    white_users=load_white_users()
-                ).run(
-                    mysql=True,
-                    thread_cot=128,
-                    use_proc_pool=False,
-                    use_email=True,
-                    dynamic_range_length=range[0]-range[1],
-                    err_print=True,
-                    visit_shuffle=False,
-                    save_db_type=0,
-                    debug=False,
-                    save_by_django=False
+                mark_ok(
+                    id=range[2],
+                    success_cot=
+                        DarenStaticDataGenerator(
+                            start=range[0],
+                            end=range[1],
+                            white_users=load_white_users()
+                        ).run(
+                            mysql=True,
+                            thread_cot=128,
+                            use_proc_pool=False,
+                            use_email=True,
+                            dynamic_range_length=range[0]-range[1],
+                            err_print=True,
+                            visit_shuffle=False,
+                            save_db_type=0,
+                            debug=False,
+                            save_by_django=False
+                        )
                 )
-                mark_ok(id=range[2],success_cot=success_cot)
             except Exception as e:
                 print(str(e))
             finally:
