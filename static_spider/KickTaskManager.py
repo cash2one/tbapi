@@ -20,7 +20,7 @@ sys.path.append(
 from generate_daren_static_data import DarenStaticDataGenerator
 
 import random,time,gc
-import pymysql
+import pymysql,requests
 
 def get_conn():
     conn = pymysql.connect(
@@ -70,11 +70,12 @@ def get_spefic_range(leftest,rightest):
     conn.close()
     return data
 
-def mark_ok(id,success_cot):
+def mark_ok(id,success_cot,ip,timeuse):
     conn = get_conn()
     cur = conn.cursor()
     sql = 'update task_flag set `is_crawled`=1 , `success_cot`={} \
-                WHERE `id`={}'.format(success_cot,id)
+                `timeuse`={},`ip`={} WHERE `id`={}'\
+                    .format(success_cot,timeuse,ip,id)
     print(sql)
     cur.execute(sql)
     print('update {} ok'.format(id))
@@ -92,8 +93,16 @@ def load_white_users():
             continue
     return []
 
+def get_ip():
+    try:
+        return requests.get('https://api.ipify.org/',timeout=10).text
+    except:
+        return None
+
 def run(big_loop=True,leftest=None,rightest=None):
     gc.enable()
+    ip = get_ip()
+    print(ip)
     while(1):
         try:
             if big_loop:
@@ -103,26 +112,25 @@ def run(big_loop=True,leftest=None,rightest=None):
             print(range)
             #mark_ok(id,2)
             try:
-                mark_ok(
-                    id=range[2],
-                    success_cot=
-                        DarenStaticDataGenerator(
-                            start=range[0],
-                            end=range[1],
-                            white_users=load_white_users()
-                        ).run(
-                            mysql=True,
-                            thread_cot=128,
-                            use_proc_pool=False,
-                            use_email=True,
-                            dynamic_range_length=range[0]-range[1],
-                            err_print=True,
-                            visit_shuffle=False,
-                            save_db_type=0,
-                            debug=False,
-                            save_by_django=False
-                        )
+                params = DarenStaticDataGenerator(
+                    start=range[0],
+                    end=range[1],
+                    white_users=load_white_users()
+                ).run(
+                    mysql=True,
+                    thread_cot=128,
+                    use_proc_pool=False,
+                    use_email=True,
+                    dynamic_range_length=range[0]-range[1],
+                    err_print=True,
+                    visit_shuffle=False,
+                    save_db_type=0,
+                    debug=False,
+                    save_by_django=False
                 )
+                params['ip'] = ip
+                params['id'] = range[2]
+                mark_ok(*params)
             except Exception as e:
                 print(str(e))
             finally:

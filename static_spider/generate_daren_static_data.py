@@ -355,7 +355,10 @@ class DarenStaticDataGenerator:
         #print(subject+'\n'+res_content)
         pool.close()
         pool.join()
-        return self.insert_cot
+        return {
+            'success_cot': self.insert_cot,
+            'timeuse': ex_tm.gap
+        }
 
 if __name__=="__main__":
     generator = DarenStaticDataGenerator(5732587480,57325881000)
