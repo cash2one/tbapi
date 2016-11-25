@@ -17,7 +17,7 @@ sys.path.append(
     )
 )
 
-from generate_daren_static_data import DarenStaticDataGenerator
+#from generate_daren_static_data import DarenStaticDataGenerator
 
 import random,time,gc
 import pymysql,requests
@@ -83,6 +83,17 @@ def mark_ok(id,success_cot,ip,timeuse):
     cur.close()
     conn.close()
 
+def mark_running(id):
+    conn = get_conn()
+    cur = conn.cursor()
+    sql = 'update task_flag set `is_crawled`=2 WHERE `id`={}'.format(id)
+    print(sql)
+    cur.execute(sql)
+    print('mark {} runnning ok'.format(id))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 
 def load_white_users():
     for maybe_path in ['./white_users', 'static_spider/white_users']:
@@ -106,10 +117,12 @@ def run(big_loop=True,leftest=None,rightest=None):
     while(1):
         try:
             if big_loop:
-                range = random.choice(get_unfinished_range())
+                ranges = get_unfinished_range()
             else:
-                range = random.choice(get_spefic_range(leftest,rightest))
+                ranges = get_spefic_range(leftest,rightest)
+            range = random.choice(ranges)
             print(range)
+            mark_running(id=range[2])
             #mark_ok(id,2)
             try:
                 params = DarenStaticDataGenerator(
