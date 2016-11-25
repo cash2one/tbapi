@@ -122,7 +122,7 @@ def run(big_loop=True,leftest=None,rightest=None):
                 ranges = get_spefic_range(leftest,rightest)
             range = random.choice(ranges)
             print(range)
-            mark_running(id=range[2])
+            #mark_running(id=range[2])
             #mark_ok(id,2)
             try:
                 params = DarenStaticDataGenerator(
