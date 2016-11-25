@@ -9,7 +9,7 @@
 @description:
             --
 """
-import pymysql
+import pymysql,time
 
 def get_conn():
     while(1):
@@ -25,15 +25,18 @@ def get_conn():
             return conn
         except:
             pass
+        time.sleep(1)
+
 
 def mark_flag(left):
     conn = get_conn()
     cur = conn.cursor()
     right = left + 100000
+    grade = int(left/100000000)
     sql = (
-        'insert into task_flag(`left`,`right`)'
-        ' VALUES ({},{})'
-    ).format(left,right)
+        'insert into task_flag(`left`,`right`,`grade`)'
+        ' VALUES ({},{},{}})'
+    ).format(left,right,grade)
     print(sql)
     try:
         cur.execute(sql)

@@ -110,7 +110,7 @@ def get_ip():
     except:
         return None
 
-def run(big_loop=True,leftest=None,rightest=None):
+def run(big_loop=True,leftest=None,rightest=None,thread_cot=128):
     gc.enable()
     ip = get_ip()
     print(ip)
@@ -131,7 +131,7 @@ def run(big_loop=True,leftest=None,rightest=None):
                     white_users=load_white_users()
                 ).run(
                     mysql=True,
-                    thread_cot=128,
+                    thread_cot=thread_cot,
                     use_proc_pool=False,
                     use_email=True,
                     dynamic_range_length=100000,
