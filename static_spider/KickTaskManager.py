@@ -73,8 +73,8 @@ def get_spefic_range(leftest,rightest):
 def mark_ok(id,success_cot,ip,timeuse):
     conn = get_conn()
     cur = conn.cursor()
-    sql = 'update task_flag set `is_crawled`=1 , `success_cot`={} \
-                `timeuse`={},`ip`={} WHERE `id`={}'\
+    sql = "update task_flag set `is_crawled`=1 , `success_cot`={}, \
+                `timeuse`={},`ip`='{}' WHERE `id`={}"\
                     .format(success_cot,timeuse,ip,id)
     print(sql)
     cur.execute(sql)
@@ -121,16 +121,14 @@ def run(big_loop=True,leftest=None,rightest=None):
                     thread_cot=128,
                     use_proc_pool=False,
                     use_email=True,
-                    dynamic_range_length=range[0]-range[1],
+                    dynamic_range_length=100000,
                     err_print=True,
                     visit_shuffle=False,
                     save_db_type=0,
                     debug=False,
                     save_by_django=False
                 )
-                params['ip'] = ip
-                params['id'] = range[2]
-                mark_ok(*params)
+                mark_ok(ip=ip,id=range[2],success_cot=params['success_cot'],timeuse=int(params['timeuse']))
             except Exception as e:
                 print(str(e))
             finally:
