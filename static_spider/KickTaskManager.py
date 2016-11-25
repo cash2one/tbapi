@@ -81,6 +81,16 @@ def mark_ok(id,success_cot):
     cur.close()
     conn.close()
 
+
+def load_white_users():
+    for maybe_path in ['./white_users', 'static_spider/white_users']:
+        try:
+            with open(maybe_path, 'r') as f:
+                return [int(line.strip('\n')) for line in f.readlines()]
+        except:
+            continue
+    return []
+
 def run(big_loop=True,leftest=None,rightest=None):
     while(1):
         try:
@@ -89,31 +99,30 @@ def run(big_loop=True,leftest=None,rightest=None):
             else:
                 range = random.choice(get_spefic_range(leftest,rightest))
             print(range)
-            left = range[0]
-            right = range[1]
-            id = range[2]
             #mark_ok(id,2)
             try:
                 success_cot = DarenStaticDataGenerator(
-                        left,right).run(
+                    start=range[0],
+                    end=range[1],
+                    white_users=load_white_users()
+                ).run(
                     mysql=True,
                     thread_cot=128,
                     use_proc_pool=False,
                     use_email=True,
-                    dynamic_range_length=right-left,
+                    dynamic_range_length=range[0]-range[1],
                     err_print=True,
                     visit_shuffle=False,
                     save_db_type=0,
                     debug=False,
                     save_by_django=False
                 )
-                mark_ok(id,success_cot)
+                mark_ok(id=range[2],success_cot=success_cot)
             except Exception as e:
                 print(str(e))
             finally:
                 gc.collect()
         except:
-            pass
-
+            time.sleep(2)
 
 

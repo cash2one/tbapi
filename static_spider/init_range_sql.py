@@ -46,9 +46,9 @@ def mark_flag(left):
 
 
 
-start = 5600000000
+start = 1200000000
 
-end =   5700000000
+end =   1300000000
 
 gap = 100000
 

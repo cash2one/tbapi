@@ -39,8 +39,11 @@ except:
     pass
 
 
+
+
 class DarenStaticDataGenerator:
-    def __init__(self,start,end):
+    def __init__(self,start,end,white_users):
+        self.white_users = white_users
         self.start = start
         self.end = end
         self.gap = end - start
@@ -48,18 +51,8 @@ class DarenStaticDataGenerator:
         self.insert_cot = 0
         self.mark = 0
         self.use_email = True
-        self.white_users = self.load_white_users()
         print('load white users: {}'.format(
             len(self.white_users)))
-
-    def load_white_users(self):
-        for maybe_path in ['./white_users','static_spider/white_users']:
-            try:
-                with open(maybe_path,'r') as f:
-                    return [ int(line.strip('\n')) for line in f.readlines() ]
-            except:
-                continue
-        return []
 
     def mkdir_daren(self):
         time_str = get_beijing_time(format='%Y_%m_%d_%H_%M_%S')
@@ -168,8 +161,8 @@ class DarenStaticDataGenerator:
 
     def save_to_mysql_by_sql_alchemy(self,prod,status):
         #print('open sqlalchrmy session...')
+        db_session = Session()
         try:
-            db_session = Session()
             db_session.add(
                 DarenGoodInfo(
                     createTime=prod['createTime'],
@@ -353,7 +346,7 @@ class DarenStaticDataGenerator:
             bmd_success_cot, dav_success_cot,
             self.insert_cot, ex_tm.gap
         )
-        for mail_address in ['763038567@qq.com','965606089@qq.com']:
+        for mail_address in ['965606089@qq.com']:
             self.send_mail(
                 subject=subject,
                 content = res_content,
