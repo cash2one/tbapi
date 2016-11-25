@@ -17,7 +17,7 @@ sys.path.append(
     )
 )
 
-#from generate_daren_static_data import DarenStaticDataGenerator
+from generate_daren_static_data import DarenStaticDataGenerator
 
 import random,time,gc
 import pymysql,requests
@@ -135,7 +135,7 @@ def run(big_loop=True,leftest=None,rightest=None,thread_cot=128):
                     use_proc_pool=False,
                     use_email=True,
                     dynamic_range_length=100000,
-                    err_print=True,
+                    err_print=False,
                     visit_shuffle=False,
                     save_db_type=0,
                     debug=False,

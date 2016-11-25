@@ -40,7 +40,7 @@ if aliyun:
         'mysql://{}:{}@{}:{}/{}?charset=utf8'
     ).format(
         'root','xingguang@123',
-        '123.57.213.217',3306,'spiderpython',
+        '10.45.142.89',3306,'spiderpython',
     )
 else:
     mysql_url = (
