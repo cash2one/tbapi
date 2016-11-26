@@ -76,12 +76,10 @@ class DarenStaticDataGenerator:
             print('request timeout...')
             return 404
         if resp.status_code==404:
-            '''
             if self.err_print:
                 print('{}\t{}\t{}\t{}\t\t{}\t Fail\t\t{}\t{}'.format(
                     self.tot-self.mark,self.dynamic_range_length,
                     self.tot,self.gap,self.insert_cot,prod_id,prod_url))
-            '''
             return 404
         detail_page_html = resp.text
         parser = ProdPageParser(
