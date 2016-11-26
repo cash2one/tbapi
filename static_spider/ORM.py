@@ -32,15 +32,17 @@ class DarenGoodInfo(Base):
     createTime = Column(String)
     goodNoteDetailStep = Column(Integer)
 
-
+import random
 aliyun = True
 
 if aliyun:
+    url = random.choice(['10.45.142.89','123.57.213.217','10.45.145.230'])
+    #url = '10.45.145.230'
     mysql_url = (
         'mysql://{}:{}@{}:{}/{}?charset=utf8'
     ).format(
         'root','xingguang@123',
-        '10.45.142.89',3306,'spiderpython',
+        url,3306,'spiderpython',
     )
 else:
     mysql_url = (
