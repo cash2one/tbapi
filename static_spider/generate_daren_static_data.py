@@ -69,7 +69,7 @@ class DarenStaticDataGenerator:
     def get_prod_info(self,prod_id):
         prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
         #print(prod_url)
-        resp = request_with_ipad(prod_url,time_out=10)
+        resp = request_with_ipad(prod_url,time_out=5)
         try:
             resp.status_code
         except:
@@ -85,9 +85,9 @@ class DarenStaticDataGenerator:
         parser = ProdPageParser(
             html=detail_page_html)
         prod = parser.to_dict()
-        status = '{}\t{}\t{}\t{}\t\t{}\t SUCCESS\t{}'\
+        status = '{}\t{}\t{}\t{}\t\t{}\t SUCCESS'\
               .format(self.tot-self.mark,self.dynamic_range_length,
-                      self.tot,self.gap,self.insert_cot,prod_id)
+                      self.tot,self.gap,self.insert_cot)
         prod['darenNoteUrl'] = prod_url
         return prod,status
 
@@ -161,6 +161,8 @@ class DarenStaticDataGenerator:
         #print('open sqlalchrmy session...')
         db_session = Session()
         try:
+            tm = Timer()
+            tm.start()
             db_session.add(
                 DarenGoodInfo(
                     createTime=prod['createTime'],
@@ -176,15 +178,16 @@ class DarenStaticDataGenerator:
                     goodNoteDetailStep = 3
                 )
             )
-            db_session.commit()
+            #db_session.commit()
             self.insert_cot += 1
-            print('{}\tSave {} to mysql: OK'\
-                  .format(status,prod['darenNoteId']))
+            tm.end()
+            print('{}\tSave {} to mysql: OK. spent {} s'\
+                  .format(status,prod['darenNoteId'],tm.gap))
         except Exception as e:
             print('{}\tSave to mysql ERROR: {}'\
                   .format(status,str(e)))
-        finally:
-            db_session.close()
+        del tm
+        db_session.close()
 
     def save_to_mysql_by_django_orm(self,prod,status):
         #print('open django orm...')
