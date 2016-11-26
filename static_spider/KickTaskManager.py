@@ -110,8 +110,7 @@ def get_ip():
     except:
         return None
 
-def run(big_loop=True,leftest=None,rightest=None,thread_cot=128):
-    gc.enable()
+def run(big_loop=True,leftest=None,rightest=None,thread_cot=512):
     ip = get_ip()
     print(ip)
     while(1):
@@ -141,11 +140,12 @@ def run(big_loop=True,leftest=None,rightest=None,thread_cot=128):
                     debug=False,
                     save_by_django=False
                 )
-                mark_ok(ip=ip,id=range[2],success_cot=params['success_cot'],timeuse=int(params['timeuse']))
+                mark_ok(ip=ip,id=range[2],success_cot=params['success_cot'],
+                        timeuse=int(params['timeuse']))
             except Exception as e:
                 print(str(e))
-            finally:
-                gc.collect(generation=2)
+            del ranges
+            del params
         except:
             time.sleep(2)
 
