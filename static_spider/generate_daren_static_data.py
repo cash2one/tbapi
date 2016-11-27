@@ -178,7 +178,7 @@ class DarenStaticDataGenerator:
                     goodNoteDetailStep = 3
                 )
             )
-            #db_session.commit()
+            db_session.commit()
             self.insert_cot += 1
             tm.end()
             print('{}\tSave {} to mysql: OK. spent {} s'\
