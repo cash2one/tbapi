@@ -378,7 +378,9 @@ class DarenStaticDataGenerator:
         pool.join()
         return {
             'success_cot': self.insert_cot,
-            'timeuse': ex_tm.gap
+            'timeuse': ex_tm.gap,
+            'req_use_time':round(self.req_time/self.thread_cot,2),
+            'db_use_time':round(self.db_time/self.thread_cot,2)
         }
 
 if __name__=="__main__":

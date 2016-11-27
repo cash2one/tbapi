@@ -70,12 +70,14 @@ def get_spefic_range(leftest,rightest):
     conn.close()
     return data
 
-def mark_ok(id,success_cot,ip,timeuse,db_ip):
+def mark_ok(id,success_cot,ip,timeuse,db_ip,db_use_time,req_use_time):
     conn = get_conn()
     cur = conn.cursor()
     sql = "update task_flag set `is_crawled`=1 , `success_cot`={}, \
-                `timeuse`={},`ip`='{}',`insert_db_ip`='{}' WHERE `id`={}"\
-                    .format(success_cot,timeuse,ip,db_ip,id)
+                `timeuse`={},`ip`='{}',`insert_db_ip`='{}',\
+                `db_use_time`='{}',`request_use_time`='{}'\
+                WHERE `id`={}"\
+                    .format(success_cot,timeuse,ip,db_ip,db_use_time,req_use_time,id)
     print(sql)
     cur.execute(sql)
     print('update {} ok'.format(id))
@@ -114,7 +116,7 @@ def get_ip():
 from ORM import url
 
 
-def run(big_loop=True,leftest=None,rightest=None,thread_cot=512):
+def run(big_loop=True,leftest=None,rightest=None,thread_cot=64):
     ip = get_ip()
     print(ip)
     while(1):
@@ -138,7 +140,7 @@ def run(big_loop=True,leftest=None,rightest=None,thread_cot=512):
                     thread_cot=thread_cot,
                     use_proc_pool=False,
                     use_email=True,
-                    dynamic_range_length=100000,
+                    dynamic_range_length=1000000,
                     err_print=False,
                     visit_shuffle=False,
                     save_db_type=0,
@@ -146,7 +148,9 @@ def run(big_loop=True,leftest=None,rightest=None,thread_cot=512):
                     save_by_django=False
                 )
                 mark_ok(ip=ip,id=range[2],success_cot=params['success_cot'],
-                        timeuse=int(params['timeuse']),db_ip=url)
+                        timeuse=int(params['timeuse']),db_ip=url,
+                        db_use_time=params['db_use_time'],req_use_time=params['req_use_time']
+                        )
             except Exception as e:
                 print(str(e))
             del ranges
