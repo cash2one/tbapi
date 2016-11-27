@@ -65,8 +65,8 @@ def get_beijing_time(format='%Y-%m-%d %H:%M:%S'):
         .strftime(format)
 
 import requests
-def request_with_ipad(url,time_out=10):
-    for i in range(20):
+def request_with_ipad(url,time_out=15):
+    for i in range(3):
         try:
             return requests.get(url,timeout=time_out,
                 headers={'user-agent': 'Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5")'}

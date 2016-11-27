@@ -70,12 +70,12 @@ def get_spefic_range(leftest,rightest):
     conn.close()
     return data
 
-def mark_ok(id,success_cot,ip,timeuse):
+def mark_ok(id,success_cot,ip,timeuse,db_ip):
     conn = get_conn()
     cur = conn.cursor()
     sql = "update task_flag set `is_crawled`=1 , `success_cot`={}, \
-                `timeuse`={},`ip`='{}' WHERE `id`={}"\
-                    .format(success_cot,timeuse,ip,id)
+                `timeuse`={},`ip`='{}',`insert_db_ip`='{}' WHERE `id`={}"\
+                    .format(success_cot,timeuse,ip,db_ip,id)
     print(sql)
     cur.execute(sql)
     print('update {} ok'.format(id))
@@ -106,9 +106,13 @@ def load_white_users():
 
 def get_ip():
     try:
-        return requests.get('https://api.ipify.org/',timeout=10).text
+        return requests.get('https://api.ipify.org/',timeout=15).text
     except:
         return None
+
+
+from ORM import url
+
 
 def run(big_loop=True,leftest=None,rightest=None,thread_cot=512):
     ip = get_ip()
@@ -127,6 +131,7 @@ def run(big_loop=True,leftest=None,rightest=None,thread_cot=512):
                 params = DarenStaticDataGenerator(
                     start=range[0],
                     end=range[1],
+                    #end=range[0]+1000,
                     white_users=load_white_users()
                 ).run(
                     mysql=True,
@@ -141,7 +146,7 @@ def run(big_loop=True,leftest=None,rightest=None,thread_cot=512):
                     save_by_django=False
                 )
                 mark_ok(ip=ip,id=range[2],success_cot=params['success_cot'],
-                        timeuse=int(params['timeuse']))
+                        timeuse=int(params['timeuse']),db_ip=url)
             except Exception as e:
                 print(str(e))
             del ranges

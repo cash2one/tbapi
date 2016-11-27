@@ -51,6 +51,8 @@ class DarenStaticDataGenerator:
         self.insert_cot = 0
         self.mark = 0
         self.use_email = True
+        self.db_time = 0
+        self.req_time = 0
         print('load white users: {}'.format(
             len(self.white_users)))
 
@@ -69,12 +71,18 @@ class DarenStaticDataGenerator:
     def get_prod_info(self,prod_id):
         prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
         #print(prod_url)
-        resp = request_with_ipad(prod_url,time_out=5)
+        tm = Timer()
+        tm.start()
+        resp = request_with_ipad(prod_url,time_out=self.time_out)
+        tm.end()
+        gap = tm.gap
+        self.req_time += gap
         try:
             resp.status_code
         except:
             print('request timeout...')
             return 404
+        del tm
         if resp.status_code==404:
             if self.err_print:
                 print('{}\t{}\t{}\t{}\t\t{}\t Fail\t\t{}\t{}'.format(
@@ -85,9 +93,15 @@ class DarenStaticDataGenerator:
         parser = ProdPageParser(
             html=detail_page_html)
         prod = parser.to_dict()
-        status = '{}\t{}\t{}\t{}\t\t{}\t SUCCESS'\
-              .format(self.tot-self.mark,self.dynamic_range_length,
-                      self.tot,self.gap,self.insert_cot)
+        index = self.tot-self.mark
+        status = '{}\t{}\t{}\t{}\t\t{}\t{}s\t{}s\t{}s\t SUCCESS'\
+              .format(index,self.dynamic_range_length,
+                      self.tot,self.gap,self.insert_cot,round(gap,2),
+                      round(self.req_time/self.thread_cot,2),
+                      round(self.req_time/index,2)
+                      )
+    
+
         prod['darenNoteUrl'] = prod_url
         return prod,status
 
@@ -181,8 +195,11 @@ class DarenStaticDataGenerator:
             db_session.commit()
             self.insert_cot += 1
             tm.end()
-            print('{}\tSave {} to mysql: OK. spent {} s'\
-                  .format(status,prod['darenNoteId'],tm.gap))
+            print('{}\tSave {} to mysql: OK. spent {} / {} s'\
+                  .format(status,prod['darenNoteId'],
+                  round(tm.gap,2),round(self.db_time/self.thread_cot,2), 
+                  ))
+            self.db_time += tm.gap
         except Exception as e:
             print('{}\tSave to mysql ERROR: {}'\
                   .format(status,str(e)))
@@ -270,8 +287,10 @@ class DarenStaticDataGenerator:
             visit_shuffle=False,
             save_db_type=0,
             debug=False,
-            save_by_django=True
+            save_by_django=True,
+            time_out=20
             ):
+        self.time_out = time_out
         self.save_by_djagno = save_by_django
         self.debug = debug
         self.err_print=err_print
@@ -280,6 +299,7 @@ class DarenStaticDataGenerator:
         self.shuffle = visit_shuffle
         self.dynamic_range_length = dynamic_range_length
         self.save_db_type = save_db_type
+        self.thread_cot = thread_cot
         #self.mkdir_daren()
         if use_proc_pool:
             pool = ProcPool()
