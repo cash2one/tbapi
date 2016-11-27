@@ -33,36 +33,44 @@ class DarenGoodInfo(Base):
     goodNoteDetailStep = Column(Integer)
 
 import random
-aliyun = True
 
-if aliyun:
-    url = random.choice(['10.45.142.89','123.57.213.217'])
-    #url = '10.45.145.230'
-    mysql_url = (
-        'mysql://{}:{}@{}:{}/{}?charset=utf8'
-    ).format(
-        'root','xingguang@123',
-        url,3306,'spiderpython',
-    )
-else:
-    mysql_url = (
-        'mysql://{}:{}@{}:{}/{}?charset=utf8'
-    ).format(
-        'lyn','tonylu716',
-        '10.8.3.97',3306,'spider_python',
-    )
-
-print(mysql_url)
 
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
-Session = sessionmaker()
-Session.configure(
-    bind = create_engine(
-        name_or_url=mysql_url,
-        pool_size=100,
-        pool_timeout=20,
-        pool_recycle=1800
-        #echo=True
-    )
-)
+while(1):
+    url = random.choice(['10.45.142.89','123.57.213.217'])
+    #url = '10.45.145.230'
+    aliyun = True
+
+    if aliyun:
+        mysql_url = (
+            'mysql://{}:{}@{}:{}/{}?charset=utf8'
+        ).format(
+            'root','xingguang@123',
+            url,3306,'spiderpython',
+        )
+    else:
+        mysql_url = (
+            'mysql://{}:{}@{}:{}/{}?charset=utf8'
+        ).format(
+            'lyn','tonylu716',
+            '10.8.3.97',3306,'spider_python',
+        )
+
+    print(mysql_url)
+
+    Session = sessionmaker()
+    try:
+        Session.configure(
+            bind = create_engine(
+                name_or_url=mysql_url,
+                pool_size=100,
+                pool_timeout=20,
+                pool_recycle=1800
+            #echo=True
+            )
+        )
+        break
+    except:
+        print('bad db')
+        pass
