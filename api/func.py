@@ -72,7 +72,7 @@ def request_with_ipad(url,time_out=15):
                 headers={'user-agent': 'Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5")'}
             )
         except Exception as e:
-            #print(str(e))
+            print(str(e))
             pass
 
 def get_item_dicts(json_str):
