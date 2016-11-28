@@ -73,7 +73,6 @@ def request_with_ipad(url,time_out=15):
             )
         except Exception as e:
             print(str(e))
-            pass
 
 def get_item_dicts(json_str):
     item_dicts = []

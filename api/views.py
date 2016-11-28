@@ -90,6 +90,26 @@ def get_daren_prods(request):
     return ret
 
 @json_response
+def get_daren_prods_plus(request):
+    ret = {'data': None, 'status': 0, 'message': None}
+    if request.method != 'GET':
+        ret['message'] = 'use GET method'
+        return ret
+    daren_url = request.GET.get('daren_url')
+    print('receive daren home page url: ', daren_url)
+    try:
+        spider = DarenPageSpider(daren_url)
+        ret['data'] = spider.to_json()
+        ret['status'] = 1
+        print('Sent info json ok!')
+    except KeyError as e:
+        ret['message'] = str(e)
+    except Exception as e:
+        ret['message'] = 'check daren page url,server except as [{}]'.format(str(e))
+        print(e)
+    return ret
+
+@json_response
 def random_kick(request):
     return base_radom_kick(request,shuffle=False)
 

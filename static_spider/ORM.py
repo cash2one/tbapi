@@ -32,8 +32,8 @@ class DarenGoodInfo(Base):
     createTime = Column(String)
     goodNoteDetailStep = Column(Integer)
 
-import random
 
+import random,time
 
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
@@ -71,6 +71,6 @@ while(1):
             )
         )
         break
-    except:
+    except Exception as e:
+        time.sleep(1)
         print('bad db')
-        pass

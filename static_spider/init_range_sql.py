@@ -34,9 +34,9 @@ def mark_flag(left):
     right = left + 100000
     grade = int(left/100000000)
     sql = (
-        'insert into task_flag(`left`,`right`,`grade`)'
-        ' VALUES ({},{},{}})'
-    ).format(left,right,grade)
+        'insert into task_flag(`left`,`right`,`grade`,`index`)'
+        ' VALUES ({},{},{},{})'
+    ).format(left,right,grade,grade)
     print(sql)
     try:
         cur.execute(sql)
@@ -47,25 +47,25 @@ def mark_flag(left):
     cur.close()
     conn.close()
 
+if __name__=="__main__":
+
+    start = 900000000
+
+    end =   6000000000
+
+    gap = 100000
 
 
-start = 1200000000
+    '''
+    lefts = list(range(start,end,gap))
 
-end =   1300000000
+    for j in lefts:
+        print(j,j+gap)
+    '''
 
-gap = 100000
-
-
-'''
-lefts = list(range(start,end,gap))
-
-for j in lefts:
-    print(j,j+gap)
-'''
-
-from multiprocessing.dummy import Pool as ThreadPool
+    from multiprocessing.dummy import Pool as ThreadPool
 
 
-pool = ThreadPool(32)
+    pool = ThreadPool(32)
 
-pool.map(mark_flag,range(start,end,gap))
+    pool.map(mark_flag,range(start,end,gap))

@@ -12,8 +12,13 @@
 import json,re
 from bs4 import BeautifulSoup
 from multiprocessing.dummy import Pool as ThreadPool
-from .func import request_with_ipad,get_item_dicts
-from .decorators import except_return_none
+try:
+    from .func import request_with_ipad,get_item_dicts
+    from .decorators import except_return_none
+except:
+    from func import request_with_ipad,get_item_dicts
+    from decorators import except_return_none
+
 ERN_METHOD = lambda func:except_return_none(func,ModelName='DarenPageParser')
 
 class DarenPageParser:
@@ -112,11 +117,11 @@ class ProdsInfoGenerator:
     def get_prod_url(self,prod_id):
         if isinstance(prod_id,int):
             prod_id = str(prod_id)
-        return self.domain + self.soup.find('a',attrs={'href':re.compile(prod_id)})['href']
+        return self.domain + self.soup.find(
+            'a',attrs={'href':re.compile(prod_id)})['href']
 
     def get_prod_detail(self,prod_id):
-        prod_url = self.get_prod_url(
-            prod_id = prod_id)
+        prod_url = self.get_prod_url(prod_id)
         detail_page_html = request_with_ipad(prod_url).text
         json_str = detail_page_html.split('<!--  contentPage :   {content=')[1]\
                         .split(' -->')[0]
@@ -139,7 +144,9 @@ class ProdsInfoGenerator:
         self.run()
         return self.jds
 
-
+    def to_id_list(self):
+        item_dicts = get_item_dicts(json_str=self.json_str)
+        return [ item_dict['id'] for item_dict in item_dicts ]
 
 class Product:
     def __init__(self,div_section,domain):
@@ -200,4 +207,6 @@ if __name__=="__main__":
     import requests
     domain = 'http://qzktt.uz.taobao.com/'
     html = requests.get(domain).text
-    ProdsInfoGenerator(html_source=html,domain=domain[:-1]).to_list()
+    ids = ProdsInfoGenerator(
+        html_source=html,domain=domain[:-1]).to_id_list()
+    print(ids)

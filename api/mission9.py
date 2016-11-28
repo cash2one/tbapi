@@ -40,7 +40,7 @@ class goodInfo:
 
     def __init__(self, r=None):
         if r.status_code is not 200:
-            print('Error')
+            print('rq status Error')
             return
         else:
             try:
@@ -76,7 +76,7 @@ class goodInfo:
     def shopName(self):
         # 店铺名
         res = self.soup.find(class_='tb-shop-name').text.strip() if self.is_tb\
-            else self.soup.select_one('#side-shop-info > div > h3 > div > a').text
+            else self.soup.select_one('.slogo-shopname').text
         return res
 
     @property
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
     goodInfo(get(url)).show()     # 按照url查询 tb
 
-    goodInfo(get(goodID)).show()    # 按照ID查询 tmall
+    #goodInfo(get(goodID)).show()    # 按照ID查询 tmall
 
     '''
     天猫商品详情页面请求 价格 上下架时间 url：被ban
