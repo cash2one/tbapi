@@ -14,21 +14,25 @@ try:
 except:
     from init_range_sql import get_conn
 
+import os,sys
+sys.path.append(
+    os.path.dirname(
+        sys.path[0]
+        ))
 from api.func import Timer
 from api.DarenPageParser import ProdsInfoGenerator
 from multiprocessing.dummy import Pool as ThreadPool
 import requests
 
 
-EX_THREAD_COT = 32
+EX_THREAD_COT = 64
 
 
 def get_unhandled_darenIds():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
-        'select darenId from t_daren_note_task where\
-            is_crawled=0 or is_crawled is NULL limit 16'
+        'select darenId from t_daren_note_task '
     )
     ids = [ item[0] for item in cur.fetchall()]
     cur.close()
@@ -77,7 +81,7 @@ def mark_task_ok(darenId,timeuse,crawl_cot,insert_cot):
     cur = conn.cursor()
     sql = (
         "update t_daren_note_task set `timeuse`={},"
-        "`is_crawled`=1,`crawl_cot`={},`insert_cot`={} "
+        "`crawl_cot`={},`insert_cot`={} "
         "where darenId='{}'"
     ).format(timeuse,crawl_cot,insert_cot,darenId)
     try:
@@ -120,13 +124,11 @@ def crawl_per_daren(darenId):
 
 
 if __name__=="__main__":
+    import time
     while(1):
         darenIds = get_unhandled_darenIds()
-        if len(darenIds)<16:
-            EX_THREAD_COT = len(darenIds)
-        else:
-            EX_THREAD_COT = 16
         ex_pool = ThreadPool(EX_THREAD_COT)
         ex_pool.map(crawl_per_daren,darenIds)
         ex_pool.close()
         ex_pool.join()
+        time.sleep(1)

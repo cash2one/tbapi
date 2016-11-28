@@ -24,6 +24,7 @@ def get_conn():
             conn.autocommit=True
             return conn
         except:
+            print('db conn error')
             pass
         time.sleep(1)
 
