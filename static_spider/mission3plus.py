@@ -22,28 +22,35 @@ sys.path.append(
 from api.func import Timer
 from api.DarenPageParser import ProdsInfoGenerator
 from multiprocessing.dummy import Pool as ThreadPool
-import requests
+import requests,random
 
 
 EX_THREAD_COT = 64
 
+conn_pool = []
+
+for i in range(100):
+    conn_pool.append(get_conn())
+
+
+def get_random_conn():
+    return random.choice(conn_pool)
 
 def get_unhandled_darenIds():
-    conn = get_conn()
+    conn = get_random_conn()
     cur = conn.cursor()
     cur.execute(
         'select darenId from t_daren_note_task '
     )
     ids = [ item[0] for item in cur.fetchall()]
     cur.close()
-    conn.close()
     return ids
 
 def insert_per_good(kvargs):
     return insert_one_good(**kvargs)
 
 def insert_one_good(darenId,darenNoteId,table):
-    conn = get_conn()
+    conn = get_random_conn()
     cur = conn.cursor()
     sql = "insert into {}(`darenId`,`darenNoteId`) \
         VALUES ('{}','{}')".format(table,darenId,darenNoteId)
@@ -58,7 +65,6 @@ def insert_one_good(darenId,darenNoteId,table):
         print(sql)
         res = False
     cur.close()
-    conn.close()
     return res
 
 def get_good_ids(darenHomeUrl):
@@ -77,7 +83,7 @@ def get_good_ids(darenHomeUrl):
         return []
 
 def mark_task_ok(darenId,timeuse,crawl_cot,insert_cot):
-    conn = get_conn()
+    conn = get_random_conn()
     cur = conn.cursor()
     sql = (
         "update t_daren_note_task set `timeuse`={},"
@@ -92,7 +98,6 @@ def mark_task_ok(darenId,timeuse,crawl_cot,insert_cot):
         print(str(e))
         print(sql)
     cur.close()
-    conn.close()
 
 def crawl_per_daren(darenId):
     tm = Timer()
