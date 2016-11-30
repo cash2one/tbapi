@@ -118,6 +118,68 @@ def insert_one_good(darenId,darenNoteId,table):
         connObj['status'] = 0
     return res
 
+def insert_per_goods(kwargs):
+    return insert_goods(**kwargs)
+
+def insert_goods(darenId,darenNoteIds,table):
+    connObj = get_random_conn()
+    conn = connObj['conn']
+    cur = conn.cursor()
+    result = []
+    for darenNoteId in darenNoteIds:
+        sql = "insert into {}(`darenId`,`darenNoteId`) \
+            VALUES ('{}','{}')".format(table,darenId,darenNoteId)
+        print(sql)
+        try:
+            cur.execute(sql)
+            print('insert {} ok'.format(darenNoteId))
+            res = True
+        except pymysql.err.IntegrityError as e:
+            #print(str(e))
+            res = False
+        except Exception as e:
+            print('insert error:{}'.format(str(e)))
+            print(sql)
+            res = False
+        result.append(res)
+    print(result)
+    #conn.commit()
+    return result
+
+'''
+def insert_one_good(darenId,darenNoteId,table):
+    connObj = get_random_conn()
+    conn = connObj['conn']
+    cur = conn.cursor()
+    sql = "insert into {}(`darenId`,`darenNoteId`) \
+        VALUES ('{}','{}')".format(table,darenId,darenNoteId)
+    #print(sql)
+    dead_lock = 0
+    try:
+        cur.execute(sql)
+        conn.commit()
+        print('insert {} ok'.format(darenNoteId))
+        res = True
+    except pymysql.err.IntegrityError:
+        res = False
+    except Exception as e:
+        dead_lock = 1
+        print('insert error:{}'.format(str(e)))
+        print(sql)
+        res = False
+    cur.close()
+    if dead_lock:
+        conn.close()
+        conn_pool.remove(connObj)
+        conn_pool.append({
+            'conn': get_conn(),
+            'status': 1
+        })
+    else:
+        connObj['status'] = 0
+    return res
+'''
+
 def get_good_ids(darenHomeUrl):
     for i in range(1):
         try:
@@ -174,7 +236,8 @@ def crawl_per_daren(darenId):
     tm.end()
     req_use = tm.gap
     tm.start()
-    res = pool.map(insert_per_good,goods)
+    res = insert_goods(darenId,darenNoteIds,'t_daren_goodinfo_02')
+    #res = pool.map(insert_per_good,goods)
     tm.end()
     pool.close()
     pool.join()
@@ -190,6 +253,16 @@ def crawl_per_daren(darenId):
 
 
 if __name__=="__main__":
+    '''
+    insert_goods(
+        darenId='123',
+        darenNoteIds=[
+            '4456',
+            '567'
+        ],
+        table='t_daren_goodinfo_02'
+    )
+    '''
     import time
     while(1):
         index = 0
