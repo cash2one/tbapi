@@ -13,6 +13,7 @@ from static_spider.generate_daren_static_data import DarenStaticDataGenerator
 from .SearchPageInfoGenerator import StoreInfoGenerator
 from .ProductPageSpider import ProductPageSpider
 from .DarenPageSpider import DarenPageSpider
+from .mission9 import goodInfo
 from .func import json_response,try_int
 
 @json_response
@@ -165,4 +166,23 @@ def base_radom_kick(request,shuffle=False):
         ret['message'] = 'run all range item ok'
     except Exception as e:
         ret['message'] = str(e)
+    return ret
+
+@json_response
+def basic_prod_info(request):
+    ret = {'data': None, 'status': 0, 'message': None}
+    if request.method != 'GET':
+        ret['message'] = 'use GET method'
+        return ret
+    prod_url = request.GET['prod_url']
+    good_id = request.GET['good_id']
+    for arg in [prod_url,good_id]:
+        try:
+            ret['data'] = goodInfo(arg).to_dict()
+            ret['status'] = 1
+            return ret
+        except Exception as e:
+            print(str(e))
+            ret['message'] = str(e)
+            continue
     return ret

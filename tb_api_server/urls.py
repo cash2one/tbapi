@@ -25,7 +25,8 @@ urlpatterns = [
     url(r'^get_products_info',get_products_info),
     url(r'^get_daren_prods',get_daren_prods),
     url(r'^random_kick',random_kick),
-    url(r'^random_kick_plus',random_kick_plus)
+    url(r'^random_kick_plus',random_kick_plus),
+    url(r'^basic_prod_info',basic_prod_info),
 ]
 
 '''

@@ -43,7 +43,8 @@ class goodInfo:
 
     '''
 
-    def __init__(self, r=None):
+    def __init__(self, arg):
+        r = get(arg)
         if r.status_code is not 200:
             print('rq status Error')
             return
