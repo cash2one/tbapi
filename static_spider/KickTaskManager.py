@@ -116,7 +116,13 @@ def get_ip():
 from ORM import url
 
 
-def run(big_loop=True,leftest=None,rightest=None,thread_cot=64):
+def run(
+        big_loop=True,
+        leftest=None,
+        rightest=None,
+        thread_cot=64,
+        print_404=False
+):
     ip = get_ip()
     print(ip)
     while(1):
@@ -141,7 +147,7 @@ def run(big_loop=True,leftest=None,rightest=None,thread_cot=64):
                     use_proc_pool=False,
                     use_email=True,
                     dynamic_range_length=100000,
-                    err_print=False,
+                    err_print=print_404,
                     visit_shuffle=False,
                     save_db_type=0,
                     debug=False,
