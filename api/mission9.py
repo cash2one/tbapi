@@ -6,7 +6,10 @@
 ~~~~~~~~~~~~~~~~
 
 """
-
+try:
+    from .SearchPageInfoGenerator import StoreInfoGenerator
+except:
+    from SearchPageInfoGenerator import StoreInfoGenerator
 import requests
 from bs4 import BeautifulSoup as bs
 import json
@@ -27,6 +30,8 @@ def get(arg):
         url = 'https://item.taobao.com/item.htm?id='.join(['', str(arg)])
         id = arg
     r = requests.get(url)
+    print(url)
+    print(r.status_code)
     r.id = id
     return r
 
@@ -48,29 +53,50 @@ class goodInfo:
             except:
                 self.soup = bs(r.text, 'html.parser')
         self.goodID = r.id
-
         # r.url 根据id 重定向 以此判断选择哪一个解析器
         # 如访问：https://item.taobao.com/item.htm?id=536138243373
         # r.url = 'https://detail.tmall.com/item.htm?id=536138243373'
-        if 'tmall' in r.url:
-            self.is_tb = False
+        self.url = r.url
+        self.is_tb = 'taobao' in r.url
+        self.refund = None
+        self.detailCommon = None
+        self.list_dsr_info = None
+        self.promotion = None
+        self.generate_promotion()
+        if self.is_tb:
+            self.generate_refund()
+            self.generate_detailCommon()
         else:
-            self.is_tb = True
+            self.generate_list_dsr()
+
+    def generate_list_dsr(self):
+        url = (
+            'https://dsr-rate.tmall.com'
+            '/list_dsr_info.htm?itemId={}&callback=jsonp'
+        ).format(self.goodID)
+        print(url)
+        js = requests.get(url).text.split('jsonp(')[-1][:-2]
+        print(js)
+        jd = json.loads(js)
+        self.comment_cot = jd['dsr']['rateTotal']
 
     @property
     def goodName(self):
         # 商品信息
-        res = self.soup.find(id='J_Title').h3['data-title'] if self.is_tb \
-            else self.soup.select_one('.tb-detail-hd > h1 > a').text
+        res = self.soup.find(id='J_Title').h3['data-title'].strip() if self.is_tb \
+            else self.soup.select_one('.tb-detail-hd > h1').text.strip()
         return res
 
     @property
     def goodPrice(self):
         # 商品价格
-        res = self.soup.find(id='J_StrPrice').text if self.is_tb \
-            else None
-        # self.soup.select_one('#J_StrPriceModBox > dd').text
-        return res
+        if self.promotion:
+            return self.promotion['zkPrice']
+        else:
+            if self.is_tb:
+                return float(self.soup.find(id='J_StrPrice').text.strip('¥'))
+            else:
+                return -1
 
     @property
     def shopName(self):
@@ -82,64 +108,81 @@ class goodInfo:
     @property
     def shopLink(self):
         # 店铺链接
-        res = self.soup.find(class_='tb-shop-name').a['href']
+        res = self.soup.find(class_='tb-shop-name').a['href'] if self.is_tb\
+            else self.soup.select_one('.slogo-shopname')['href']
+        if res[0] == '/':
+            res = 'https:' + res
         return res
 
     @property
     def sellerName(self):
         # 卖家名
-        res = self.soup.find(class_='tb-shop-seller').a['title']
+        res = self.soup.find(class_='tb-shop-seller')\
+            .a['title'].strip('掌柜:') if self.is_tb\
+            else None
         return res
 
     @property
     def shopScores(self):
         # 卖家分
-        shop_scores = self.soup.find(class_='tb-shop-rate').find_all('a')
-        score = list(
-            map(lambda i: float(i.get_text().strip().replace('\n', '')),
-                shop_scores))
-        return score
+        if self.is_tb:
+            shop_scores = self.soup.find(class_='tb-shop-rate').find_all('a')
+            score = list(
+                map(lambda i: float(i.get_text().strip().replace('\n', '')),
+                    shop_scores))
+            return score
+        else:
+            return [ round(float(item['title'][:-1]),3) for item
+                        in self.soup.find_all('em',class_='count')]
 
-    @property
-    def detailCommon(self):
+    def generate_detailCommon(self):
         # 评论页面json数据
         if self.is_tb:
             request_url = 'https://rate.taobao.com/detailCommon.htm?auctionNumId=' + \
                 str(self.goodID)
+            print(request_url)
             raw = requests.get(request_url).text.split('(')[-1].split(')')[0]
             res = json.loads(raw)
             # 按照str格式化输出
             # print(json.dumps(res, sort_keys=True, indent=4, ensure_ascii=False))
-        return res
+        #print(res)
+        else:
+            res = None
+        self.detailCommon = res
 
     @property
     def comment(self):
         # 评论json
-        return self.detailCommon['data']['count']
+        return self.detailCommon['data']['count'] if self.is_tb else None
 
     @property
     def impression(self):
         # 大家印象页面 list
-        return self.detailCommon['data']['impress']
+        return self.detailCommon['data']['impress'] if self.is_tb else None
 
     @property
     def rate_of_good(self):
         # 计算好评率
-        total = self.detailCommon['data']['count']['total']
-        good = self.detailCommon['data']['count']['good']
-        return round(good / total * 100, 2)
+        if self.is_tb:
+            total = self.detailCommon['data']['count']['total']
+            good = self.detailCommon['data']['count']['good']
+            return round(good / total, 2)
+        else:
+            return -1
 
-    @property
-    def refund(self):
+    def generate_refund(self):
         # 售后页面json
         if self.is_tb:
             url = 'https://rate.taobao.com/refund/refund_common.htm?auctionNumId=' + \
                 str(self.goodID) + \
-                '&userNumId=673837271&_ksTS=1479983685671_1994&callback=jsonp1995'
-            raw = requests.get(url).text.split('jsonp1995(')[-1][:-1]
+                '&userNumId=673837271&_ksTS=1479983685671_1994&callback=jsonp'
+            #print('refund_url',url)
+            raw = requests.get(url).text.split('jsonp(')[-1][:-1]
             res = json.loads(raw)
             # print(json.dumps(res, sort_keys=True, indent=4, ensure_ascii=False))
-        return res
+        else:
+            res = None
+        self.refund = res
 
     @property
     def refundSpeed(self):
@@ -147,6 +190,8 @@ class goodInfo:
         if self.is_tb:
             res = self.refund['refundSpeed'][
                 'detailDateMap']['refundSpeed']['day']
+        else:
+            return -1
         return res
 
     @property
@@ -154,7 +199,8 @@ class goodInfo:
         # 纠纷率
         if self.is_tb:
             res = self.refund['disputeRatio']['base']['localVal']
-
+        else:
+            return -1
         return res
 
     @property
@@ -162,8 +208,13 @@ class goodInfo:
         # 售后率
         if self.is_tb:
             res = self.refund['refundSale']['base']['localVal']
+        else:
+            return -1
         return res
 
+    def generate_promotion(self):
+        # 促销信息
+        self.promotion = StoreInfoGenerator(store_url=self.url).to_json()
     # wrong
     # @property
     # def start_time(self):
@@ -175,28 +226,58 @@ class goodInfo:
     def show(self):
         # 测试打印
         print('\n********* New Good **************')
-        print('Name:\t{}'.format(self.goodName))
-        print('Price:\t{}'.format(self.goodPrice))
-        print('ShopName:\t{}'.format(self.shopName))
-        print('shopLink:\t{}'.format(self.shopLink))
-        print('sellerName:\t{}'.format(self.sellerName))
-        print('描述 服务 物流:\t{}'.format(self.shopScores))
-        print('评论:\t{}\n'.format(self.comment))
-        print('大家印象\t{}\n'.format(self.impression))
-        print('好评率\t{}%'.format(self.rate_of_good))
-        # print('售后服务情况 \t{}\n'.format(self.refund))
-        print('售后速度\t{}天'.format(self.refundSpeed))
-        print('纠纷率\t{}%'.format(self.disputeRatio))
-        print('售后率\t{}%'.format(self.refundSale))
-        # print('上架时间\t{}'.format(self.start_time))
+        info = self.to_dict()
+        for key in self.to_dict().keys():
+            print('{}:\t{}'.format(key,info[key]))
+
+    def to_dict(self):
+        if self.is_tb:
+            return {
+                'good_name': self.goodName,
+                'goodPrice': self.goodPrice,
+                'shopName': self.shopName,
+                'good_name': self.goodName,
+                'shopLink': self.shopLink,
+                'sellerName': self.sellerName,
+                'shopScores': self.shopScores,
+                'comment': self.comment,
+                'impression': self.impression,
+                'rate_of_good': self.rate_of_good,
+                'refund': self.refund,
+                'refundSpeed': self.refundSpeed,
+                'disputeRatio': self.disputeRatio,
+                'refundSale': self.refundSale,
+                'promotion': self.promotion,
+            }
+        else:
+            return {
+                'good_name': self.goodName,
+                'goodPrice': self.goodPrice,
+                'shopName': self.shopName,
+                'good_name': self.goodName,
+                'shopLink': self.shopLink,
+                #'sellerName': self.sellerName,
+                'shopScores': self.shopScores,
+                'comment_cot': self.comment_cot,
+                'promotion': self.promotion,
+                #'rate_total': self.rate_total
+                #'impression': self.impression,
+                #'rate_of_good': self.rate_of_good,
+                #'refund': self.refund,
+                #'refundSpeed': self.refundSpeed,
+                #'disputeRatio': self.disputeRatio,
+                #'refundSale': self.refundSale,
+            }
+
 
 if __name__ == "__main__":
-    goodID = 536138243373  # tmall id
-    url = 'https://item.taobao.com/item.htm?id=538180971307'  # taobao link
+    goodID = 539565305499  # tmall id
+    #url = 'https://item.taobao.com/item.htm?id=539342473126'  # taobao link
 
-    goodInfo(get(url)).show()     # 按照url查询 tb
+    #goodInfo(get(url)).show()     # 按照url查询 tb
 
-    #goodInfo(get(goodID)).show()    # 按照ID查询 tmall
+
+    goodInfo(get(goodID)).show()    # 按照ID查询 tmall
 
     '''
     天猫商品详情页面请求 价格 上下架时间 url：被ban
