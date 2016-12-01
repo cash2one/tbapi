@@ -255,7 +255,6 @@ class goodInfo:
                 'good_name': self.goodName,
                 'goodPrice': self.goodPrice,
                 'shopName': self.shopName,
-                'good_name': self.goodName,
                 'shopLink': self.shopLink,
                 #'sellerName': self.sellerName,
                 'shopScores': self.shopScores,

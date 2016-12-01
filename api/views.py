@@ -174,9 +174,15 @@ def basic_prod_info(request):
     if request.method != 'GET':
         ret['message'] = 'use GET method'
         return ret
-    prod_url = request.GET['prod_url']
-    good_id = request.GET['good_id']
-    for arg in [prod_url,good_id]:
+    default_info = {
+        'prod_url': None,
+        'good_id': None
+    }
+    for key in request.GET:
+        default_info[key] = try_int(request.GET[key])
+    for arg in [default_info['prod_url'],default_info['good_id']]:
+        if arg==None:
+            continue
         try:
             ret['data'] = goodInfo(arg).to_dict()
             ret['status'] = 1
