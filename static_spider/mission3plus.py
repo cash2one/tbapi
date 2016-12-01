@@ -26,7 +26,7 @@ import requests,random,pymysql
 
 global index
 index = 0
-EX_THREAD_COT = 32
+EX_THREAD_COT = 16
 
 conn_pool = []
 
@@ -37,7 +37,7 @@ def init_conn(i):
         'status':0
         })
 
-pool = ThreadPool(32)
+pool = ThreadPool(64)
 pool.map(init_conn,range(100))
 pool.close()
 pool.join()
@@ -83,40 +83,7 @@ def get_unhandled_darenIds():
     connObj['status']=0
     return ids
 
-def insert_per_good(kvargs):
-    return insert_one_good(**kvargs)
 
-def insert_one_good(darenId,darenNoteId,table):
-    connObj = get_random_conn()
-    conn = connObj['conn']
-    cur = conn.cursor()
-    sql = "insert into {}(`darenId`,`darenNoteId`) \
-        VALUES ('{}','{}')".format(table,darenId,darenNoteId)
-    #print(sql)
-    dead_lock = 0
-    try:
-        cur.execute(sql)
-        conn.commit()
-        print('insert {} ok'.format(darenNoteId))
-        res = True
-    except pymysql.err.IntegrityError:
-        res = False
-    except Exception as e:
-        dead_lock = 1
-        print('insert error:{}'.format(str(e)))
-        print(sql)
-        res = False
-    cur.close()
-    if dead_lock:
-        conn.close()
-        conn_pool.remove(connObj)
-        conn_pool.append({
-            'conn': get_conn(),
-            'status': 1
-        })
-    else:
-        connObj['status'] = 0
-    return res
 
 def insert_per_goods(kwargs):
     return insert_goods(**kwargs)
@@ -129,9 +96,10 @@ def insert_goods(darenId,darenNoteIds,table):
     for darenNoteId in darenNoteIds:
         sql = "insert into {}(`darenId`,`darenNoteId`) \
             VALUES ('{}','{}')".format(table,darenId,darenNoteId)
-        print(sql)
+        #print(sql)
         try:
             cur.execute(sql)
+            #conn.commit()
             print('insert {} ok'.format(darenNoteId))
             res = True
         except pymysql.err.IntegrityError as e:
@@ -142,46 +110,15 @@ def insert_goods(darenId,darenNoteIds,table):
             print(sql)
             res = False
         result.append(res)
-    print(result)
+    #print(result)
     #conn.commit()
+    cur.close()
+    connObj['status'] = 0
     return result
 
-'''
-def insert_one_good(darenId,darenNoteId,table):
-    connObj = get_random_conn()
-    conn = connObj['conn']
-    cur = conn.cursor()
-    sql = "insert into {}(`darenId`,`darenNoteId`) \
-        VALUES ('{}','{}')".format(table,darenId,darenNoteId)
-    #print(sql)
-    dead_lock = 0
-    try:
-        cur.execute(sql)
-        conn.commit()
-        print('insert {} ok'.format(darenNoteId))
-        res = True
-    except pymysql.err.IntegrityError:
-        res = False
-    except Exception as e:
-        dead_lock = 1
-        print('insert error:{}'.format(str(e)))
-        print(sql)
-        res = False
-    cur.close()
-    if dead_lock:
-        conn.close()
-        conn_pool.remove(connObj)
-        conn_pool.append({
-            'conn': get_conn(),
-            'status': 1
-        })
-    else:
-        connObj['status'] = 0
-    return res
-'''
 
 def get_good_ids(darenHomeUrl):
-    for i in range(1):
+    for i in range(2):
         try:
             req = requests.get(darenHomeUrl,timeout=5)
             html = req.text
@@ -253,16 +190,6 @@ def crawl_per_daren(darenId):
 
 
 if __name__=="__main__":
-    '''
-    insert_goods(
-        darenId='123',
-        darenNoteIds=[
-            '4456',
-            '567'
-        ],
-        table='t_daren_goodinfo_02'
-    )
-    '''
     import time
     while(1):
         index = 0
