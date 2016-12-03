@@ -21,7 +21,7 @@ for i in range(up_level_N):
 import json,time,random
 from api.func import Timer,get_beijing_time,request_with_ipad
 from hashlib import md5
-from urllib.parse import urlencode
+from urllib.parse import quote_plus
 
 try:
     from .Email import Email
@@ -85,7 +85,10 @@ class DarenStaticDataGenerator:
     def get_random_token(self):
         self.token_pool = [
             #'139109906fd542ceda06deb8db5c0dc9_1480777750784'
-            'e8490bd28b5ff75006db2c9fbb139522_1480782184711',
+            #'e8490bd28b5ff75006db2c9fbb139522_1480782184711',
+            #'af05dcd169ecfd71cbe1dc81df3a793e_1480784502905',
+            #'f24cfbd82aacd54c4fc7923a01c7cd20_1480786514107',
+            'df768437118404e1bc7633d2105852ae_1480787380685', 
         ]
         return random.choice(self.token_pool)
 
@@ -105,14 +108,16 @@ class DarenStaticDataGenerator:
             ).format(prod_id) + '}'
             token = self.get_random_token()
             print(token)
+            ts = str(int(round(time.time(),3)*1000)-100)
+            ts = '1480782972879'
             params = {
                 '_m_h5_tk': token,
-                'timestamp': '1480776456935',
+                'timestamp': ts,
                 'app_id': '12574478',
                 'data': data
             }
             sign = self.get_sign(**params)
-            data = urlencode(json.loads(data)).encode('utf8')
+            print('1',data)
             prod_url = (
                 'http://api.m.taobao.com/h5/mtop.master.feed.detail.pc/1.0/'
                 '?v=1.0&api=mtop.master.feed.detail.pc'
@@ -123,9 +128,9 @@ class DarenStaticDataGenerator:
                 '&sign={}'
                 '&data={}'
             ).format(
-                int(round(time.time(),3)*1000) - 100, sign, data
+                ts, sign, quote_plus(data)
             )
-        print('prod_url:',prod_url)
+        print('\nprod_url:',prod_url)
         tm = Timer()
         tm.start()
         resp = request_with_ipad(prod_url,time_out=self.time_out)
