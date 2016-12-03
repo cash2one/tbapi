@@ -121,7 +121,7 @@ class DarenStaticDataGenerator:
             ).format(
                 int(round(time.time(),3)*1000) - 100, sign, data
             )
-        print(prod_url)
+        print('prod_url:',prod_url)
         tm = Timer()
         tm.start()
         resp = request_with_ipad(prod_url,time_out=self.time_out)
