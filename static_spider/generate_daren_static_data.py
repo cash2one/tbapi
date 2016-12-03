@@ -20,6 +20,7 @@ for i in range(up_level_N):
 
 import json,time,random
 from api.func import Timer,get_beijing_time,request_with_ipad
+from hashlib import md5
 
 try:
     from .Email import Email
@@ -57,7 +58,6 @@ class DarenStaticDataGenerator:
         self.req_time = 0
         self.version = 2
         self.time_out=15
-        self.sign='2e4ebc901a33facfbcb869d6627887b5'
         print('load white users: {}'.format(
             len(self.white_users)))
 
@@ -73,11 +73,42 @@ class DarenStaticDataGenerator:
             if sub_dir not in os.listdir(new_dir):
                 os.mkdir('{}/{}'.format(new_dir,sub_dir))
 
+    def get_sign(_m_h5_tk, timestamp, app_id, data):
+        print(data)
+        src = _m_h5_tk + "&" + timestamp + "&" + app_id + "&" + data
+        print('src:',src)
+        sign = md5(src.encode('utf8')).hexdigest()
+        print('sign:',sign)
+        return sign
+
+    def get_random_token(self):
+        self.token_pool = [
+            '139109906fd542ceda06deb8db5c0dc9_1480777750784'
+        ]
+        return random.choice(self.token_pool)
+
     def get_prod_info(self,prod_id):
         if self.version==1:
             prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
             #print(prod_url)
         if self.version==2:
+            data = '{' + (
+                '"feedId":"{}",'
+                '"curPage":"1","pageSize":"3",'
+                '"opa":"true","opaFansCount":"true",'
+                '"opfCommentList":"true","opf":"true",'
+                '"opfCommentsCount":"true",'
+                '"opfFavoursCount":"false",'
+                '"opfFavouritesCount":"false"'
+            ).format(prod_id) + '}'
+            params = {
+                '_m_h5_tk': self.get_random_token(),
+                'app_id': '12574478',
+                'timestamp': '1480776456935',
+                'data': data
+            }
+            get_sign(**params)
+            sign = self.get_sign(**params)
             prod_url = (
                 'http://api.m.taobao.com/h5/mtop.master.feed.detail.pc/1.0/'
                 '?v=1.0&api=mtop.master.feed.detail.pc'
@@ -86,21 +117,9 @@ class DarenStaticDataGenerator:
                 '&callback=mtopjsonp1'
                 '&type=jsonp'
                 '&sign={}'
-                '&data=%7B%22'
-                    'feedId%22%3A%22{}%22%2C%22'
-                    'curPage%22%3A%221%22%2C%22'
-                    'pageSize%22%3A%223%22%2C%22'
-                    'opa%22%3A%22true%22%2C%22'
-                    'opaFansCount%22%3A%22true%22%2C%22'
-                    'opfCommentList%22%3A%22true%22%2C%22'
-                    'opf%22%3A%22true%22%2C%22'
-                    'opfCommentsCount%22%3A%22true%22%2C%22'
-                    'opfFavoursCount%22%3A%22false%22%2C%22'
-                    'opfFavouritesCount%22%3A%22false%22%7D'
+                '&data={}'
             ).format(
-                int(round(time.time(),3)*1000) - 100,
-                self.sign,
-                prod_id
+                int(round(time.time(),3)*1000) - 100, sign, data
             )
         print(prod_url)
         tm = Timer()
