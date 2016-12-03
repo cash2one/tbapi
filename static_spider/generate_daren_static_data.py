@@ -73,7 +73,7 @@ class DarenStaticDataGenerator:
             if sub_dir not in os.listdir(new_dir):
                 os.mkdir('{}/{}'.format(new_dir,sub_dir))
 
-    def get_sign(_m_h5_tk, timestamp, app_id, data):
+    def get_sign(self,_m_h5_tk, timestamp, app_id, data):
         print(data)
         src = _m_h5_tk + "&" + timestamp + "&" + app_id + "&" + data
         print('src:',src)
@@ -83,7 +83,8 @@ class DarenStaticDataGenerator:
 
     def get_random_token(self):
         self.token_pool = [
-            '139109906fd542ceda06deb8db5c0dc9_1480777750784'
+            #'139109906fd542ceda06deb8db5c0dc9_1480777750784'
+            'e8490bd28b5ff75006db2c9fbb139522_1480782184711',
         ]
         return random.choice(self.token_pool)
 
@@ -101,13 +102,14 @@ class DarenStaticDataGenerator:
                 '"opfFavoursCount":"false",'
                 '"opfFavouritesCount":"false"'
             ).format(prod_id) + '}'
+            token = self.get_random_token()
+            print(token)
             params = {
-                '_m_h5_tk': self.get_random_token(),
-                'app_id': '12574478',
+                '_m_h5_tk': token,
                 'timestamp': '1480776456935',
+                'app_id': '12574478',
                 'data': data
             }
-            get_sign(**params)
             sign = self.get_sign(**params)
             prod_url = (
                 'http://api.m.taobao.com/h5/mtop.master.feed.detail.pc/1.0/'
