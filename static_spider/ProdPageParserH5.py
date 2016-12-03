@@ -32,7 +32,12 @@ class ProdPageParserH5:
                 html = f.read()
         #print(html)
         self.html = html
-        self.jd = json.loads(self.html.strip('mtopjsonp1(')[:-1])['data']
+        txt = self.html.strip(' mtopjsonp1(')[:-1]
+        print(txt)
+        with open('./h5_txt','wb') as f:
+            f.write(txt.encode('utf8'))
+        self.jd = json.loads(txt)['data']
+        print('json dict parsed ok')
 
     @property
     @ERN_METHOD

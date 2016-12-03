@@ -56,6 +56,8 @@ class DarenStaticDataGenerator:
         self.db_time = 0
         self.req_time = 0
         self.version = 2
+        self.time_out=15
+        self.sign='2e4ebc901a33facfbcb869d6627887b5'
         print('load white users: {}'.format(
             len(self.white_users)))
 
@@ -83,7 +85,7 @@ class DarenStaticDataGenerator:
                 '&t={}'
                 '&callback=mtopjsonp1'
                 '&type=jsonp'
-                '&sign=fc63eb99c97b14f90775dd5d1e17b331'
+                '&sign={}'
                 '&data=%7B%22'
                     'feedId%22%3A%22{}%22%2C%22'
                     'curPage%22%3A%221%22%2C%22'
@@ -97,6 +99,7 @@ class DarenStaticDataGenerator:
                     'opfFavouritesCount%22%3A%22false%22%7D'
             ).format(
                 int(round(time.time(),3)*1000) - 100,
+                self.sign,
                 prod_id
             )
         print(prod_url)
@@ -119,6 +122,9 @@ class DarenStaticDataGenerator:
                     self.tot,self.gap,self.insert_cot,prod_id,prod_url))
             return 404
         detail_page_html = resp.text
+        #print(detail_page_html)
+        with open('./sample_h5','wb') as f:
+            f.write(detail_page_html.encode('utf8'))
         if self.version==1:
             parser = ProdPageParser(
                 html = detail_page_html
@@ -424,5 +430,5 @@ class DarenStaticDataGenerator:
         }
 
 if __name__=="__main__":
-    generator = DarenStaticDataGenerator(5732587480,57325881000)
+    generator = DarenStaticDataGenerator(5732587480,57325881000,white_users=[])
     generator.get_prod_info(prod_id=5781684166)
