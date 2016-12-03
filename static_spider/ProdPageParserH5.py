@@ -33,7 +33,7 @@ class ProdPageParserH5:
         #print(html)
         self.html = html
         txt = self.html.strip(' mtopjsonp1(')[:-1]
-        print(txt)
+        #print(txt)
         with open('./h5_txt','wb') as f:
             f.write(txt.encode('utf8'))
         self.jd = json.loads(txt)['data']
