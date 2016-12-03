@@ -24,10 +24,12 @@ from api.func import Timer,get_beijing_time,request_with_ipad
 try:
     from .Email import Email
     from .ProdPageParser import ProdPageParser
+    from .ProdPageParserH5 import ProdPageParserH5
     from .ORM import Session,DarenGoodInfo
 except:
     from Email import Email
     from ProdPageParser import ProdPageParser
+    from ProdPageParserH5 import ProdPageParserH5
     from ORM import Session,DarenGoodInfo
 
 from multiprocessing.dummy import Pool as ThreadPool
@@ -53,6 +55,7 @@ class DarenStaticDataGenerator:
         self.use_email = True
         self.db_time = 0
         self.req_time = 0
+        self.version = 2
         print('load white users: {}'.format(
             len(self.white_users)))
 
@@ -69,8 +72,34 @@ class DarenStaticDataGenerator:
                 os.mkdir('{}/{}'.format(new_dir,sub_dir))
 
     def get_prod_info(self,prod_id):
-        prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
-        #print(prod_url)
+        if self.version==1:
+            prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
+            #print(prod_url)
+        if self.version==2:
+            prod_url = (
+                'http://api.m.taobao.com/h5/mtop.master.feed.detail.pc/1.0/'
+                '?v=1.0&api=mtop.master.feed.detail.pc'
+                '&appKey=12574478'
+                '&t={}'
+                '&callback=mtopjsonp1'
+                '&type=jsonp'
+                '&sign=fc63eb99c97b14f90775dd5d1e17b331'
+                '&data=%7B%22'
+                    'feedId%22%3A%22{}%22%2C%22'
+                    'curPage%22%3A%221%22%2C%22'
+                    'pageSize%22%3A%223%22%2C%22'
+                    'opa%22%3A%22true%22%2C%22'
+                    'opaFansCount%22%3A%22true%22%2C%22'
+                    'opfCommentList%22%3A%22true%22%2C%22'
+                    'opf%22%3A%22true%22%2C%22'
+                    'opfCommentsCount%22%3A%22true%22%2C%22'
+                    'opfFavoursCount%22%3A%22false%22%2C%22'
+                    'opfFavouritesCount%22%3A%22false%22%7D'
+            ).format(
+                int(round(time.time(),3)*1000) - 100,
+                prod_id
+            )
+        print(prod_url)
         tm = Timer()
         tm.start()
         resp = request_with_ipad(prod_url,time_out=self.time_out)
@@ -90,18 +119,22 @@ class DarenStaticDataGenerator:
                     self.tot,self.gap,self.insert_cot,prod_id,prod_url))
             return 404
         detail_page_html = resp.text
-        parser = ProdPageParser(
-            html=detail_page_html)
+        if self.version==1:
+            parser = ProdPageParser(
+                html = detail_page_html
+            )
+        else:
+            parser = ProdPageParserH5(
+                html = detail_page_html
+            )
         prod = parser.to_dict()
-        index = self.tot-self.mark
+        index = self.tot - self.mark
         status = '{}\t{}\t{}\t{}\t\t{}\t{}s\t{}s\t{}s\t SUCCESS'\
               .format(index,self.dynamic_range_length,
                       self.tot,self.gap,self.insert_cot,round(gap,2),
                       round(self.req_time/self.thread_cot,2),
                       round(self.req_time/index,2)
                       )
-    
-
         prod['darenNoteUrl'] = prod_url
         return prod,status
 
@@ -139,7 +172,12 @@ class DarenStaticDataGenerator:
                      prod['goodId'],prod['goodUrl'],get_beijing_time()
                 )
         '''
-        WHITE_USER = int(prod['userId']) in self.white_users
+        try:
+            prod['userId'] = int(prod['userId'])
+        except:
+            pass
+
+        WHITE_USER = prod['userId'] in self.white_users
         '''
         if WHITE_USER:
             sql_name = 'baimingdan.sql'
@@ -288,8 +326,10 @@ class DarenStaticDataGenerator:
             save_db_type=0,
             debug=False,
             save_by_django=True,
-            time_out=20
+            time_out=20,
+            version=2
             ):
+        self.version = version
         self.time_out = time_out
         self.save_by_djagno = save_by_django
         self.debug = debug
@@ -385,5 +425,4 @@ class DarenStaticDataGenerator:
 
 if __name__=="__main__":
     generator = DarenStaticDataGenerator(5732587480,57325881000)
-    generator.run(mysql=False,thread_cot=32,dynamic_range_length=1000)
-    #generator.load_white_users()
+    generator.get_prod_info(prod_id=5781684166)

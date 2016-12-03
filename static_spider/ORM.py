@@ -73,4 +73,4 @@ while(1):
         break
     except Exception as e:
         time.sleep(1)
-        print('bad db')
+        print(str(e))
