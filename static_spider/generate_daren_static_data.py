@@ -21,6 +21,7 @@ for i in range(up_level_N):
 import json,time,random
 from api.func import Timer,get_beijing_time,request_with_ipad
 from hashlib import md5
+from urllib.parse import urlencode
 
 try:
     from .Email import Email
@@ -109,6 +110,7 @@ class DarenStaticDataGenerator:
             }
             get_sign(**params)
             sign = self.get_sign(**params)
+            data = urlencode(json.loads(data)).encode('utf8')
             prod_url = (
                 'http://api.m.taobao.com/h5/mtop.master.feed.detail.pc/1.0/'
                 '?v=1.0&api=mtop.master.feed.detail.pc'
