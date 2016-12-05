@@ -41,7 +41,8 @@ def get_store_info(request):
 @json_response
 def get_page_num(request):
     return handle_product_page_request(
-            request,just_for_page_num=True)
+        request,just_for_page_num=True
+    )
 
 @json_response
 def get_products_info(request):

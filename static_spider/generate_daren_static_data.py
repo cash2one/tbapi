@@ -96,6 +96,10 @@ class DarenStaticDataGenerator:
         if self.version==1:
             prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
             #print(prod_url)
+            tm = Timer()
+            tm.start()
+            resp = request_with_ipad(prod_url,
+                    time_out=self.time_out)
         if self.version==2:
             data = '{' + (
                 '"feedId":"{}",'
@@ -130,10 +134,22 @@ class DarenStaticDataGenerator:
             ).format(
                 ts, sign, quote_plus(data)
             )
+            tm = Timer()
+            tm.start()
+            resp = requests.get(
+                url = prod_url,
+                timeout = self.time_out,
+                headers={
+                    'Cookie': token,
+                    'Referer': "http://h5.m.taobao.com/we/pc.htm?feedId={}".format(prod_id),
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:29.0) Gecko/20100101 Firefox/29.0',
+                    'Connnection': 'keep-alive',
+                    'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Accept': '*/*',
+                }
+            )
         print('\nprod_url:',prod_url)
-        tm = Timer()
-        tm.start()
-        resp = request_with_ipad(prod_url,time_out=self.time_out)
         tm.end()
         gap = tm.gap
         self.req_time += gap
