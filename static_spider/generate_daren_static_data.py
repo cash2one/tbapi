@@ -20,14 +20,18 @@ for i in range(up_level_N):
 
 import json,time,random
 from api.func import Timer,get_beijing_time,request_with_ipad
+from hashlib import md5
+from urllib.parse import quote_plus
 
 try:
     from .Email import Email
     from .ProdPageParser import ProdPageParser
+    from .ProdPageParserH5 import ProdPageParserH5
     from .ORM import Session,DarenGoodInfo
 except:
     from Email import Email
     from ProdPageParser import ProdPageParser
+    from ProdPageParserH5 import ProdPageParserH5
     from ORM import Session,DarenGoodInfo
 
 from multiprocessing.dummy import Pool as ThreadPool
@@ -53,6 +57,8 @@ class DarenStaticDataGenerator:
         self.use_email = True
         self.db_time = 0
         self.req_time = 0
+        self.version = 2
+        self.time_out=15
         print('load white users: {}'.format(
             len(self.white_users)))
 
@@ -68,12 +74,82 @@ class DarenStaticDataGenerator:
             if sub_dir not in os.listdir(new_dir):
                 os.mkdir('{}/{}'.format(new_dir,sub_dir))
 
+    def get_sign(self,_m_h5_tk, timestamp, app_id, data):
+        print(data)
+        src = _m_h5_tk + "&" + timestamp + "&" + app_id + "&" + data
+        print('src:',src)
+        sign = md5(src.encode('utf8')).hexdigest()
+        print('sign:',sign)
+        return sign
+
+    def get_random_token(self):
+        self.token_pool = [
+            #'139109906fd542ceda06deb8db5c0dc9_1480777750784'
+            #'e8490bd28b5ff75006db2c9fbb139522_1480782184711',
+            #'af05dcd169ecfd71cbe1dc81df3a793e_1480784502905',
+            #'f24cfbd82aacd54c4fc7923a01c7cd20_1480786514107',
+            'df768437118404e1bc7633d2105852ae_1480787380685', 
+        ]
+        return random.choice(self.token_pool)
+
     def get_prod_info(self,prod_id):
-        prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
-        #print(prod_url)
-        tm = Timer()
-        tm.start()
-        resp = request_with_ipad(prod_url,time_out=self.time_out)
+        if self.version==1:
+            prod_url = 'http://uz.taobao.com/detail/{}'.format(prod_id)
+            #print(prod_url)
+            tm = Timer()
+            tm.start()
+            resp = request_with_ipad(prod_url,
+                    time_out=self.time_out)
+        if self.version==2:
+            data = '{' + (
+                '"feedId":"{}",'
+                '"curPage":"1","pageSize":"3",'
+                '"opa":"true","opaFansCount":"true",'
+                '"opfCommentList":"true","opf":"true",'
+                '"opfCommentsCount":"true",'
+                '"opfFavoursCount":"false",'
+                '"opfFavouritesCount":"false"'
+            ).format(prod_id) + '}'
+            token = self.get_random_token()
+            print(token)
+            ts = str(int(round(time.time(),3)*1000)-100)
+            ts = '1480782972879'
+            params = {
+                '_m_h5_tk': token,
+                'timestamp': ts,
+                'app_id': '12574478',
+                'data': data
+            }
+            sign = self.get_sign(**params)
+            print('1',data)
+            prod_url = (
+                'http://api.m.taobao.com/h5/mtop.master.feed.detail.pc/1.0/'
+                '?v=1.0&api=mtop.master.feed.detail.pc'
+                '&appKey=12574478'
+                '&t={}'
+                '&callback=mtopjsonp1'
+                '&type=jsonp'
+                '&sign={}'
+                '&data={}'
+            ).format(
+                ts, sign, quote_plus(data)
+            )
+            tm = Timer()
+            tm.start()
+            resp = requests.get(
+                url = prod_url,
+                timeout = self.time_out,
+                headers={
+                    'Cookie': token,
+                    'Referer': "http://h5.m.taobao.com/we/pc.htm?feedId={}".format(prod_id),
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:29.0) Gecko/20100101 Firefox/29.0',
+                    'Connnection': 'keep-alive',
+                    'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Accept': '*/*',
+                }
+            )
+        print('\nprod_url:',prod_url)
         tm.end()
         gap = tm.gap
         self.req_time += gap
@@ -90,18 +166,25 @@ class DarenStaticDataGenerator:
                     self.tot,self.gap,self.insert_cot,prod_id,prod_url))
             return 404
         detail_page_html = resp.text
-        parser = ProdPageParser(
-            html=detail_page_html)
+        #print(detail_page_html)
+        with open('./sample_h5','wb') as f:
+            f.write(detail_page_html.encode('utf8'))
+        if self.version==1:
+            parser = ProdPageParser(
+                html = detail_page_html
+            )
+        else:
+            parser = ProdPageParserH5(
+                html = detail_page_html
+            )
         prod = parser.to_dict()
-        index = self.tot-self.mark
+        index = self.tot - self.mark
         status = '{}\t{}\t{}\t{}\t\t{}\t{}s\t{}s\t{}s\t SUCCESS'\
               .format(index,self.dynamic_range_length,
                       self.tot,self.gap,self.insert_cot,round(gap,2),
                       round(self.req_time/self.thread_cot,2),
                       round(self.req_time/index,2)
                       )
-    
-
         prod['darenNoteUrl'] = prod_url
         return prod,status
 
@@ -139,7 +222,12 @@ class DarenStaticDataGenerator:
                      prod['goodId'],prod['goodUrl'],get_beijing_time()
                 )
         '''
-        WHITE_USER = int(prod['userId']) in self.white_users
+        try:
+            prod['userId'] = int(prod['userId'])
+        except:
+            pass
+
+        WHITE_USER = prod['userId'] in self.white_users
         '''
         if WHITE_USER:
             sql_name = 'baimingdan.sql'
@@ -288,8 +376,10 @@ class DarenStaticDataGenerator:
             save_db_type=0,
             debug=False,
             save_by_django=True,
-            time_out=20
+            time_out=20,
+            version=2
             ):
+        self.version = version
         self.time_out = time_out
         self.save_by_djagno = save_by_django
         self.debug = debug
@@ -384,6 +474,5 @@ class DarenStaticDataGenerator:
         }
 
 if __name__=="__main__":
-    generator = DarenStaticDataGenerator(5732587480,57325881000)
-    generator.run(mysql=False,thread_cot=32,dynamic_range_length=1000)
-    #generator.load_white_users()
+    generator = DarenStaticDataGenerator(5732587480,57325881000,white_users=[])
+    generator.get_prod_info(prod_id=5781684166)

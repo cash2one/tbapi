@@ -132,7 +132,7 @@ def run(
             else:
                 ranges = get_spefic_range(leftest,rightest)
             range = random.choice(ranges)
-            print(range)
+            print('range',range)
             #mark_running(id=range[2])
             #mark_ok(id,2)
             try:
@@ -161,7 +161,8 @@ def run(
                 print(str(e))
             del ranges
             del params
-        except:
+        except Exception as e:
+            print(str(e))
             time.sleep(2)
 
 

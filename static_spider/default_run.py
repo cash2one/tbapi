@@ -21,4 +21,4 @@ from KickTaskManager import run
 
 
 if __name__=="__main__":
-    run(big_loop=True,thread_cot=64)
+    run(big_loop=True,thread_cot=64,print_404=True)
