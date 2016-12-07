@@ -197,6 +197,7 @@ class UserRateInfoGenerator:
         except:
             return {
                 'success':False,
+                'api_url': url,
                 'message':'you could add cookie in request to get it.'
             }
 
