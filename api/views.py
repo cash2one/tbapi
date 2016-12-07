@@ -227,6 +227,9 @@ def basic_shop_info(request):
                 if 'cookie' in request.GET.keys() else None
     )
     ret['data']['ShopService4_api'] = info_engine.get_ShopService4_api_json()
-    ret['data']['refundIndex_api'] = info_engine.get_refundIndex_api_json()
+    refundIndex = info_engine.get_refundIndex_api_json()
+    if refundIndex['success']:
+        ret['data']['refundIndex_api'] = refundIndex
+        #print(refundIndex['api_url'])
     ret['status'] = 1
     return ret
