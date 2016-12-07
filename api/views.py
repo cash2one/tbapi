@@ -15,6 +15,7 @@ from .ProductPageSpider import ProductPageSpider
 from .DarenPageSpider import DarenPageSpider
 from .mission9 import goodInfo
 from .func import json_response,try_int
+from .mission8 import ItemPageParser,UserRateInfoGenerator
 
 @json_response
 def get_store_info(request):
@@ -192,4 +193,40 @@ def basic_prod_info(request):
             print(str(e))
             ret['message'] = str(e)
             continue
+    return ret
+
+@json_response
+def basic_shop_info(request):
+    ret = {'data': {}, 'status': 0, 'message': None}
+    if request.method != 'GET':
+        ret['message'] = 'use GET method'
+        return ret
+    kwargs = {
+        'shop_id': None,
+            #http://127.0.0.1:8000/basic_shop_info?shop_id=33121581
+        'shop_url': None,
+            #http://127.0.0.1:8000/basic_shop_info?shop_url=https://fishercoffee.taobao.com/
+            #http://127.0.0.1:8000/basic_shop_info?shop_url=https://shop33121581.taobao.com/
+        'item_url': None,
+            #http://127.0.0.1:8000/basic_shop_info?item_url=https://item.taobao.com/item.htm?id=43167953945
+        'item_id': None,
+            #http://127.0.0.1:8000/basic_shop_info?item_id=43167953945
+    }
+    for key in request.GET:
+        if key != 'cookie':
+            kwargs[key] = request.GET[key]
+    parser = ItemPageParser(**kwargs)
+    #parser.print_html()
+    ret['data']['rate_info'] = parser.get_rate_info()
+    print(ret['data']['rate_info'] )
+    info_engine = UserRateInfoGenerator(
+        user_rate_id = parser.get_user_rate_id(),
+        shop_id = parser.get_shop_id(),
+        from_web = True,
+        cookie= request.GET['cookie']
+                if 'cookie' in request.GET.keys() else None
+    )
+    ret['data']['ShopService4_api'] = info_engine.get_ShopService4_api_json()
+    ret['data']['refundIndex_api'] = info_engine.get_refundIndex_api_json()
+    ret['status'] = 1
     return ret
